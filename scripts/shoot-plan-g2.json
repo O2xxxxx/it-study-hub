@@ -1,0 +1,63 @@
+{
+  "outDir": "E:/JavaEE lastwork/.tools/g2shots",
+  "shots": [
+    {
+      "name": "home",
+      "url": "/",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "article",
+      "url": "/articles/1",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "resources-popover",
+      "url": "/resources/3",
+      "w": 1440,
+      "h": 960,
+      "user": "alice",
+      "password": "alice1234",
+      "skipScroll": true,
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 1800
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "actions": [
+        {
+          "key": "Control+k",
+          "wait": 900
+        },
+        {
+          "typeText": "MyBatis",
+          "wait": 1400
+        }
+      ],
+      "skipScroll": true
+    },
+    {
+      "name": "mobile-home",
+      "url": "/",
+      "w": 390,
+      "h": 844,
+      "mobile": true
+    },
+    {
+      "name": "dark-home",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "theme": "dark"
+    }
+  ]
+}

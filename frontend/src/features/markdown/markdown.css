@@ -1,0 +1,219 @@
+/* Markdown 阅读与预览的排版样式（本模块自带，避免污染全局样式表） */
+
+.md-body {
+  --md-code-bg: hsl(215 30% 96%);
+  --md-code-fg: hsl(215 40% 22%);
+  --md-code-border: hsl(214 28% 88%);
+  --md-inline-bg: hsl(213 30% 94%);
+  --md-inline-fg: hsl(213 60% 38%);
+  --md-quote: hsl(213 90% 50%);
+  --md-rule: hsl(214 28% 90%);
+  color: hsl(var(--foreground));
+  font-size: 0.96rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+.dark .md-body {
+  --md-code-bg: hsl(218 36% 12%);
+  --md-code-fg: hsl(210 28% 90%);
+  --md-code-border: hsl(217 22% 24%);
+  --md-inline-bg: hsl(217 28% 19%);
+  --md-inline-fg: hsl(210 70% 74%);
+  --md-quote: hsl(210 92% 62%);
+  --md-rule: hsl(217 22% 24%);
+}
+
+.md-body > *:first-child { margin-top: 0; }
+.md-body > *:last-child { margin-bottom: 0; }
+
+.md-body h1,
+.md-body h2,
+.md-body h3,
+.md-body h4,
+.md-body h5,
+.md-body h6 {
+  margin: 1.6em 0 0.6em;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+.md-body h1 { font-size: 1.6rem; }
+.md-body h2 { font-size: 1.35rem; padding-bottom: 0.35em; border-bottom: 1px solid var(--md-rule); }
+.md-body h3 { font-size: 1.15rem; }
+.md-body h4 { font-size: 1.02rem; }
+.md-body h5, .md-body h6 { font-size: 0.95rem; color: hsl(var(--muted-foreground)); }
+
+.md-body p { margin: 0.85em 0; }
+
+.md-body a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: opacity 0.18s ease;
+}
+.md-body a:hover { opacity: 0.78; }
+
+.md-body strong { font-weight: 650; color: hsl(var(--foreground)); }
+.md-body em { font-style: italic; }
+
+.md-body ul,
+.md-body ol { margin: 0.85em 0; padding-left: 1.5em; }
+.md-body ul { list-style: disc; }
+.md-body ol { list-style: decimal; }
+.md-body li { margin: 0.35em 0; }
+.md-body li > ul,
+.md-body li > ol { margin: 0.3em 0; }
+.md-body li::marker { color: hsl(var(--muted-foreground)); }
+
+.md-body blockquote {
+  margin: 1.1em 0;
+  padding: 0.7em 1.1em;
+  border-left: 3px solid var(--md-quote);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: hsl(var(--primary) / 0.06);
+  color: hsl(var(--muted-foreground));
+}
+.md-body blockquote p { margin: 0.35em 0; }
+
+.md-body hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid var(--md-rule);
+}
+
+.md-body img {
+  margin: 1.1em 0;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--md-rule);
+}
+
+.md-body code {
+  padding: 0.16em 0.4em;
+  border-radius: var(--radius-xs);
+  background: var(--md-inline-bg);
+  color: var(--md-inline-fg);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.86em;
+}
+
+.md-body pre {
+  position: relative;
+  margin: 1.2em 0;
+  padding: 2.4rem 1.1rem 1.1rem;
+  overflow-x: auto;
+  border: 1px solid var(--md-code-border);
+  border-radius: var(--radius-md);
+  background: var(--md-code-bg);
+  color: var(--md-code-fg);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+.md-body pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.md-copy-btn {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--md-code-border);
+  border-radius: var(--radius-xs);
+  background: hsl(var(--card) / 0.85);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.6;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.md-copy-btn:hover { opacity: 1; color: hsl(var(--primary)); border-color: hsl(var(--primary) / 0.45); }
+.md-copy-btn:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; opacity: 1; }
+
+.md-body table {
+  display: block;
+  width: 100%;
+  margin: 1.1em 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.md-body th,
+.md-body td {
+  padding: 0.55em 0.8em;
+  border: 1px solid var(--md-rule);
+  text-align: left;
+}
+.md-body th { background: hsl(var(--muted) / 0.7); font-weight: 600; }
+.md-body tbody tr:nth-child(even) { background: hsl(var(--muted) / 0.3); }
+
+.md-body mark { padding: 0.1em 0.25em; border-radius: var(--radius-xs); background: hsl(var(--warning) / 0.28); color: inherit; }
+
+/* highlight.js 令牌配色（自带，无需额外主题文件） */
+.md-body .hljs-comment,
+.md-body .hljs-quote { color: #6a737d; font-style: italic; }
+.md-body .hljs-keyword,
+.md-body .hljs-selector-tag,
+.md-body .hljs-literal,
+.md-body .hljs-doctag,
+.md-body .hljs-formula { color: #d73a49; }
+.md-body .hljs-string,
+.md-body .hljs-regexp,
+.md-body .hljs-symbol,
+.md-body .hljs-bullet,
+.md-body .hljs-addition { color: #22863a; }
+.md-body .hljs-number,
+.md-body .hljs-variable,
+.md-body .hljs-template-variable,
+.md-body .hljs-attr,
+.md-body .hljs-attribute { color: #005cc5; }
+.md-body .hljs-title,
+.md-body .hljs-title.class_,
+.md-body .hljs-title.function_,
+.md-body .hljs-section,
+.md-body .hljs-name { color: #6f42c1; }
+.md-body .hljs-type,
+.md-body .hljs-built_in,
+.md-body .hljs-class .hljs-title { color: #b31d28; }
+.md-body .hljs-meta,
+.md-body .hljs-meta .hljs-keyword { color: #6a737d; }
+.md-body .hljs-deletion { color: #b31d28; background: #ffeef0; }
+.md-body .hljs-emphasis { font-style: italic; }
+.md-body .hljs-strong { font-weight: 700; }
+
+.dark .md-body .hljs-comment,
+.dark .md-body .hljs-quote { color: #8b98a9; }
+.dark .md-body .hljs-keyword,
+.dark .md-body .hljs-selector-tag,
+.dark .md-body .hljs-literal,
+.dark .md-body .hljs-doctag,
+.dark .md-body .hljs-formula { color: #ff7b8a; }
+.dark .md-body .hljs-string,
+.dark .md-body .hljs-regexp,
+.dark .md-body .hljs-symbol,
+.dark .md-body .hljs-bullet,
+.dark .md-body .hljs-addition { color: #7ee787; }
+.dark .md-body .hljs-number,
+.dark .md-body .hljs-variable,
+.dark .md-body .hljs-template-variable,
+.dark .md-body .hljs-attr,
+.dark .md-body .hljs-attribute { color: #79c0ff; }
+.dark .md-body .hljs-title,
+.dark .md-body .hljs-title.class_,
+.dark .md-body .hljs-title.function_,
+.dark .md-body .hljs-section,
+.dark .md-body .hljs-name { color: #d2a8ff; }
+.dark .md-body .hljs-type,
+.dark .md-body .hljs-built_in,
+.dark .md-body .hljs-class .hljs-title { color: #ffa198; }
+.dark .md-body .hljs-deletion { color: #ffa198; background: rgba(255, 129, 130, 0.15); }

@@ -1,0 +1,647 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   IT 学习天地 · 主题系统
+   冷白 + 淡蓝灰底 / 深墨蓝文字 / 单一蓝色主交互色
+   实底承载正文，模糊只服务于浮层（玻璃三级）
+   ========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* 底色与文字：淡蓝灰底 + 深墨蓝字 */
+    --background: 210 40% 97.4%;
+    --foreground: 215 46% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 46% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 46% 15%;
+
+    /* 主交互色：唯一的一支蓝 */
+    --primary: 213 88% 43%;
+    --primary-foreground: 0 0% 100%;
+    --link: 213 88% 40%;
+
+    --secondary: 212 38% 95%;
+    --secondary-foreground: 215 42% 21%;
+    --muted: 212 30% 94.5%;
+    --muted-foreground: 215 18% 40%;
+    --accent: 212 52% 93%;
+    --accent-foreground: 215 46% 17%;
+
+    --destructive: 356 74% 43%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 156 66% 28%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 92% 35%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 214 26% 88%;
+    --input: 214 24% 80%;
+    --ring: 213 88% 45%;
+    /* G2 圆角尺度：8 / 12 / 16 / 20 / 胶囊，全站只用这四档 + 999 */
+    --radius-xs: 8px;
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 16px;
+    --radius-2xl: 20px;
+    --radius-pill: 999px;
+
+    /* 玻璃材质 token */
+    --glass-tint: 210 48% 99%;
+    --glass-edge: 214 40% 25% / 0.09;
+    --glass-shine: 0 0% 100% / 0.85;
+    --glass-shade: 216 45% 22% / 0.07;
+    --glass-shadow: 216 45% 22% / 0.5;
+
+    /* 代码块：亮色主题同样使用深色底 */
+    --code-bg: 218 34% 13%;
+    --code-fg: 210 32% 92%;
+    --code-border: 218 28% 22%;
+    --hl-comment: 215 18% 63%;
+    --hl-keyword: 286 72% 80%;
+    --hl-string: 138 58% 71%;
+    --hl-number: 28 92% 73%;
+    --hl-title: 205 92% 77%;
+    --hl-attr: 45 88% 71%;
+    --hl-builtin: 186 78% 71%;
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    --background: 220 34% 8.5%;
+    --foreground: 210 30% 93%;
+
+    --card: 220 28% 11.5%;
+    --card-foreground: 210 30% 93%;
+    --popover: 220 30% 11%;
+    --popover-foreground: 210 30% 93%;
+
+    --primary: 209 94% 63%;
+    --primary-foreground: 220 45% 9%;
+    --link: 207 96% 72%;
+
+    --secondary: 220 22% 16%;
+    --secondary-foreground: 210 28% 90%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 214 16% 68%;
+    --accent: 220 24% 18%;
+    --accent-foreground: 210 30% 94%;
+
+    --destructive: 356 78% 64%;
+    --destructive-foreground: 220 45% 9%;
+    --success: 152 52% 58%;
+    --success-foreground: 220 45% 9%;
+    --warning: 38 92% 62%;
+    --warning-foreground: 220 45% 9%;
+
+    --border: 220 16% 22%;
+    --input: 220 15% 28%;
+    --ring: 209 94% 66%;
+
+    --glass-tint: 220 28% 17%;
+    --glass-edge: 210 45% 88% / 0.1;
+    --glass-shine: 0 0% 100% / 0.07;
+    --glass-shade: 220 70% 2% / 0.45;
+    --glass-shadow: 220 70% 2% / 0.75;
+
+    --code-bg: 222 40% 9%;
+    --code-fg: 210 32% 93%;
+    --code-border: 220 24% 20%;
+    --hl-comment: 215 16% 60%;
+    --hl-keyword: 288 80% 82%;
+    --hl-string: 140 62% 72%;
+    --hl-number: 26 96% 76%;
+    --hl-title: 203 96% 78%;
+    --hl-attr: 44 92% 74%;
+    --hl-builtin: 184 82% 74%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    min-height: 100vh;
+    min-height: 100svh;
+    isolation: isolate;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+    letter-spacing: -0.011em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  img, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* 焦点环：统一 2px，offset 2px，任何元素都能看清 */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: hsl(var(--primary) / 0.22);
+    color: inherit;
+  }
+
+  /* 细化滚动条 */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--input) / 0.85) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--input) / 0.75);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+    background-clip: content-box;
+  }
+}
+
+/* 以下是材质 / 排版 / 代码高亮等自定义类：
+   放在 @layer 之外，确保即使暂时没有任何组件引用也会被产出。*/
+
+/* ------------------------------------------------------------------
+   玻璃材质三级
+   仅用于浮层：顶栏 / 浮起筛选条 / 下拉与弹窗 / 全局搜索 / 移动抽屉
+   ------------------------------------------------------------------ */
+.glass-1,
+.glass-2,
+.glass-3 {
+  border: 1px solid hsl(var(--glass-edge));
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  backdrop-filter: blur(8px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 hsl(var(--glass-shine)),
+    0 1px 2px hsl(var(--glass-shade));
+}
+
+/* 一级：顶栏、底部导航 */
+.glass-1 {
+  background-color: hsl(var(--glass-tint) / 0.72);
+}
+
+/* 二级：浮起的筛选条、下拉菜单、弹窗面板、顶部导航 */
+.glass-2 {
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  background-color: hsl(var(--glass-tint) / 0.66);
+}
+
+/* 三级：全局搜索遮罩面板、移动端抽屉 */
+.glass-3 {
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  background-color: hsl(var(--glass-tint) / 0.74);
+  border-color: hsl(var(--glass-edge));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--glass-shine)),
+    0 28px 70px -28px hsl(var(--glass-shadow));
+}
+
+/* 滚动后加深的顶栏 */
+.app-header {
+  background-color: hsl(var(--glass-tint) / 0.62);
+  transition: background-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease;
+}
+
+.app-header[data-scrolled="true"] {
+  background-color: hsl(var(--glass-tint) / 0.84);
+  border-bottom-color: hsl(var(--glass-edge));
+  box-shadow:
+    inset 0 1px 0 hsl(var(--glass-shine)),
+    0 14px 34px -24px hsl(var(--glass-shadow));
+}
+
+/* 无 backdrop-filter 时的回退：整块换成不透明实底 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-1,
+  .glass-2,
+  .glass-3,
+  .app-header,
+  .app-header[data-scrolled="true"] {
+    background-color: hsl(var(--card));
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Markdown 阅读排版
+   ------------------------------------------------------------------ */
+.prose-it {
+  color: hsl(var(--foreground));
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  max-width: 68ch;
+  overflow-wrap: anywhere;
+  letter-spacing: 0.002em;
+}
+
+.prose-it > :first-child {
+  margin-top: 0;
+}
+
+.prose-it > :last-child {
+  margin-bottom: 0;
+}
+
+.prose-it h1,
+.prose-it h2,
+.prose-it h3,
+.prose-it h4 {
+  color: hsl(var(--foreground));
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.014em;
+  scroll-margin-top: 6rem;
+}
+
+.prose-it h1 {
+  margin: 2.2em 0 0.7em;
+  font-size: 1.75rem;
+}
+
+.prose-it h2 {
+  margin: 2.1em 0 0.65em;
+  font-size: 1.375rem;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.prose-it h3 {
+  margin: 1.8em 0 0.55em;
+  font-size: 1.125rem;
+}
+
+.prose-it h4 {
+  margin: 1.6em 0 0.5em;
+  font-size: 1rem;
+  color: hsl(var(--foreground) / 0.85);
+}
+
+.prose-it p {
+  margin: 1.15em 0;
+}
+
+.prose-it a {
+  color: hsl(var(--link));
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--link) / 0.32);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.18s ease, color 0.18s ease;
+}
+
+.prose-it a:hover {
+  text-decoration-color: hsl(var(--link) / 0.9);
+}
+
+.prose-it strong {
+  font-weight: 650;
+  color: hsl(var(--foreground));
+}
+
+.prose-it em {
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.prose-it blockquote {
+  margin: 1.5em 0;
+  padding: 0.85em 1.1em;
+  border-left: 3px solid hsl(var(--primary) / 0.45);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background-color: hsl(var(--primary) / 0.05);
+  color: hsl(var(--muted-foreground));
+}
+
+.prose-it blockquote > :first-child {
+  margin-top: 0;
+}
+
+.prose-it blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.prose-it ul,
+.prose-it ol {
+  margin: 1.15em 0;
+  padding-left: 1.4em;
+}
+
+.prose-it ul {
+  list-style: disc;
+}
+
+.prose-it ol {
+  list-style: decimal;
+}
+
+.prose-it li {
+  margin: 0.42em 0;
+  padding-left: 0.2em;
+}
+
+.prose-it li::marker {
+  color: hsl(var(--primary) / 0.75);
+}
+
+.prose-it li > ul,
+.prose-it li > ol {
+  margin: 0.4em 0;
+}
+
+.prose-it table {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.6em 0;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.prose-it thead {
+  background-color: hsl(var(--muted));
+}
+
+.prose-it th,
+.prose-it td {
+  padding: 0.65em 0.9em;
+  text-align: left;
+  border-bottom: 1px solid hsl(var(--border));
+  vertical-align: top;
+}
+
+.prose-it th {
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.9);
+  white-space: nowrap;
+}
+
+.prose-it tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.prose-it tbody tr:nth-child(even) {
+  background-color: hsl(var(--muted) / 0.45);
+}
+
+.prose-it img {
+  margin: 1.7em auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 18px 40px -26px hsl(var(--glass-shadow));
+}
+
+.prose-it hr {
+  margin: 2.4em 0;
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.prose-it :not(pre) > code {
+  padding: 0.16em 0.42em;
+  border-radius: var(--radius-xs);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.86em;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground) / 0.92);
+  border: 1px solid hsl(var(--border) / 0.7);
+  white-space: break-spaces;
+}
+
+.prose-it pre {
+  margin: 1.7em 0;
+  padding: 1.05rem 1.2rem;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  background-color: hsl(var(--code-bg));
+  border: 1px solid hsl(var(--code-border));
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.05),
+    0 20px 44px -30px hsl(220 60% 8% / 0.65);
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.72;
+  color: hsl(var(--code-fg));
+  tab-size: 2;
+}
+
+.prose-it pre code {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+}
+
+/* ------------------------------------------------------------------
+   highlight.js 语法着色（亮暗两套，均落在深色代码底上）
+   ------------------------------------------------------------------ */
+.hljs {
+  color: hsl(var(--code-fg));
+  background: transparent;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: hsl(var(--hl-comment));
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-type,
+.hljs-doctag {
+  color: hsl(var(--hl-keyword));
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-meta .hljs-string,
+.hljs-addition,
+.hljs-template-tag {
+  color: hsl(var(--hl-string));
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-tag .hljs-value {
+  color: hsl(var(--hl-number));
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: hsl(var(--hl-title));
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params,
+.hljs-property {
+  color: hsl(var(--hl-attr));
+}
+
+.hljs-built_in,
+.hljs-class .hljs-title,
+.hljs-function .hljs-title,
+.hljs-meta {
+  color: hsl(var(--hl-builtin));
+}
+
+.hljs-deletion {
+  color: hsl(0 85% 78%);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 650;
+}
+
+/* ------------------------------------------------------------------
+   小工具
+   ------------------------------------------------------------------ */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 18px 40px -18px hsl(var(--glass-shadow));
+  transform: translateY(-180%);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+}
+
+/* 减少动态效果：只保留透明度与状态色变化，去掉位移与弹簧 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color, border-color, box-shadow, fill, stroke !important;
+    transition-duration: 0.12s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .app-header,
+  .skip-link {
+    transition-duration: 0.01ms !important;
+  }
+}
+/* G2 连续曲率圆角（Chrome 139+）：曲率连续，比普通 border-radius 的圆弧过渡更顺滑。
+   浏览器不支持 corner-shape 时自动回退为普通圆角，视觉层级与尺寸完全一致。 */
+@supports (corner-shape: squircle) {
+  *,
+  *::before,
+  *::after {
+    corner-shape: squircle;
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "outDir": "E:/JavaEE lastwork/docs/screenshots",
+  "shots": [
+    {
+      "name": "01-home-desktop",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()"
+    },
+    {
+      "name": "02-sections-desktop",
+      "url": "/sections",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "03-article-desktop",
+      "url": "/articles/1",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true
+    },
+    {
+      "name": "04-questions-desktop",
+      "url": "/qa",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "05-question-accepted",
+      "url": "/qa/1",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true
+    },
+    {
+      "name": "06-resources-desktop",
+      "url": "/resources",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "07-resource-guest",
+      "url": "/resources/1",
+      "w": 1440,
+      "h": 1000
+    },
+    {
+      "name": "13-home-dark",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','dark'); return 'dark'; })()"
+    },
+    {
+      "name": "14-mobile-home",
+      "url": "/",
+      "w": 390,
+      "h": 844,
+      "mobile": true,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()"
+    },
+    {
+      "name": "12-search-dialog",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "skipScroll": true,
+      "actions": [
+        {
+          "key": "ctrl+k",
+          "wait": 900
+        },
+        {
+          "typeText": "MyBatis",
+          "wait": 1500
+        }
+      ]
+    },
+    {
+      "name": "10-points-desktop",
+      "url": "/points",
+      "w": 1440,
+      "h": 1100,
+      "fullPage": true,
+      "user": "alice",
+      "password": "alice1234"
+    },
+    {
+      "name": "11-profile-desktop",
+      "url": "/me",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true,
+      "user": "alice",
+      "password": "alice1234"
+    },
+    {
+      "name": "08-exchange-popover",
+      "url": "/resources/3",
+      "w": 1440,
+      "h": 960,
+      "user": "alice",
+      "password": "alice1234",
+      "skipScroll": true,
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 1800
+        }
+      ],
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 960,
+        "scale": 1
+      }
+    },
+    {
+      "name": "09-exchanged-owned",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 1000,
+      "user": "alice",
+      "password": "alice1234",
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 900
+        },
+        {
+          "clickText": "确认兑换",
+          "wait": 2600
+        }
+      ]
+    },
+    {
+      "name": "15-mobile-resource",
+      "url": "/resources/2",
+      "w": 390,
+      "h": 844,
+      "mobile": true,
+      "fullPage": true,
+      "user": "alice",
+      "password": "alice1234"
+    },
+    {
+      "name": "16-insufficient-points",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 960,
+      "user": "demo",
+      "password": "demo1234",
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 1800
+        }
+      ]
+    }
+  ]
+}

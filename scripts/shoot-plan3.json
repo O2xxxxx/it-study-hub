@@ -1,0 +1,72 @@
+{
+  "outDir": "E:/JavaEE lastwork/docs/screenshots",
+  "shots": [
+    {
+      "name": "08-exchange-popover",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 960,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7",
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 1000
+        }
+      ]
+    },
+    {
+      "name": "09-exchanged-owned",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 1000,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7",
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 800
+        },
+        {
+          "clickText": "确认兑换",
+          "wait": 2400
+        }
+      ]
+    },
+    {
+      "name": "12-search-dialog",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "actions": [
+        {
+          "key": "ctrl+k",
+          "wait": 700
+        },
+        {
+          "typeText": "MyBatis",
+          "wait": 1800
+        }
+      ]
+    },
+    {
+      "name": "13-home-dark",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','dark'); return 'ok'; })()"
+    },
+    {
+      "name": "16-insufficient-points",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 960,
+      "sessionId": "238EF8FAAA8B60745D893979715C4FD2",
+      "actions": [
+        {
+          "clickText": "兑换资料",
+          "wait": 600
+        }
+      ]
+    }
+  ]
+}

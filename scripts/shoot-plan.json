@@ -1,0 +1,152 @@
+{
+  "outDir": "E:/JavaEE lastwork/docs/screenshots",
+  "shots": [
+    {
+      "name": "01-home-desktop",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()"
+    },
+    {
+      "name": "02-sections-desktop",
+      "url": "/sections",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "03-article-desktop",
+      "url": "/articles/1",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true
+    },
+    {
+      "name": "04-questions-desktop",
+      "url": "/qa",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "05-question-accepted",
+      "url": "/qa/1",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true
+    },
+    {
+      "name": "06-resources-desktop",
+      "url": "/resources",
+      "w": 1440,
+      "h": 960
+    },
+    {
+      "name": "07-resource-guest",
+      "url": "/resources/1",
+      "w": 1440,
+      "h": 1000
+    },
+    {
+      "name": "08-exchange-popover",
+      "url": "/resources/1",
+      "w": 1440,
+      "h": 960,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7",
+      "actions": [
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => (x.textContent||'').includes('兑换资料')); if (!b) return 'no-btn'; b.click(); return 'clicked'; })()",
+          "wait": 900
+        }
+      ]
+    },
+    {
+      "name": "09-exchanged-owned",
+      "url": "/resources/1",
+      "w": 1440,
+      "h": 1000,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7",
+      "actions": [
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => (x.textContent||'').includes('兑换资料')); if (!b) return 'no-btn'; b.click(); return 'clicked'; })()",
+          "wait": 700
+        },
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => (x.textContent||'').includes('确认兑换')); if (!b) return 'no-btn'; b.click(); return 'clicked'; })()",
+          "wait": 1800
+        }
+      ]
+    },
+    {
+      "name": "10-points-desktop",
+      "url": "/points",
+      "w": 1440,
+      "h": 1100,
+      "fullPage": true,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7"
+    },
+    {
+      "name": "11-profile-desktop",
+      "url": "/me",
+      "w": 1440,
+      "h": 1000,
+      "fullPage": true,
+      "sessionId": "83F30FDB9240F4E98F9145EF38477DA7"
+    },
+    {
+      "name": "12-search-dialog",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "actions": [
+        {
+          "js": "(() => { document.dispatchEvent(new KeyboardEvent('keydown',{key:'k',code:'KeyK',ctrlKey:true,bubbles:true})); return 'sent'; })()",
+          "wait": 600
+        },
+        {
+          "js": "(() => { const i = document.querySelector('input[placeholder*=\"搜索\"], input[type=\"search\"]'); if (!i) { const d = document.querySelector('[role=dialog]'); return d ? 'dialog-no-input' : 'no-input'; } const s = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set; s.call(i,'MyBatis'); i.dispatchEvent(new Event('input',{bubbles:true})); return 'typed'; })()",
+          "wait": 1400
+        }
+      ]
+    },
+    {
+      "name": "13-home-dark",
+      "url": "/",
+      "w": 1440,
+      "h": 960,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','dark'); return 'dark'; })()"
+    },
+    {
+      "name": "14-mobile-home",
+      "url": "/",
+      "w": 390,
+      "h": 844,
+      "mobile": true,
+      "fullPage": true,
+      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()"
+    },
+    {
+      "name": "15-mobile-resource",
+      "url": "/resources/2",
+      "w": 390,
+      "h": 844,
+      "mobile": true,
+      "fullPage": true,
+      "sessionId": "988542215DD539FD2683E45BCBB37404"
+    },
+    {
+      "name": "16-insufficient-points",
+      "url": "/resources/2",
+      "w": 1440,
+      "h": 960,
+      "sessionId": "238EF8FAAA8B60745D893979715C4FD2",
+      "actions": [
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => (x.textContent||'').includes('兑换资料')); if (!b) return 'no-btn'; b.click(); return 'clicked'; })()",
+          "wait": 700
+        }
+      ]
+    }
+  ]
+}

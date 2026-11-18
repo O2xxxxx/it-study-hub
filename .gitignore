@@ -1,0 +1,18 @@
+# build output
+backend/target/
+frontend/node_modules/
+frontend/dist/
+# 本机私有配置
+backend/src/main/resources/application-local.yml
+# 本机工具链（Maven / MySQL 便携版，不属于交付源码）
+.tools/
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+Thumbs.db
+.DS_Store
+*.log
+
+# 视觉调试预览图（非交付物）
+.preview/

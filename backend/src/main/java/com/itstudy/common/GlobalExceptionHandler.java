@@ -1,0 +1,89 @@
+package com.itstudy.common;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * 全局异常处理：所有失败响应统一为 { code, message, details }。
+ */
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(BizException.class)
+    public ResponseEntity<Map<String, Object>> handleBiz(BizException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", ex.getCode());
+        body.put("message", ex.getMessage());
+        if (ex.getDetails() != null) {
+            body.put("details", ex.getDetails());
+        }
+        return ResponseEntity.status(ex.getStatus()).body(body);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleBeanValidation(MethodArgumentNotValidException ex) {
+        Map<String, Object> fieldErrors = new LinkedHashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            fieldErrors.putIfAbsent(error.getField(), error.getDefaultMessage());
+        }
+        return validationResponse(fieldErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, Object> fieldErrors = new LinkedHashMap<>();
+        for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
+            String path = violation.getPropertyPath() == null ? "" : violation.getPropertyPath().toString();
+            String field = path.contains(".") ? path.substring(path.lastIndexOf('.') + 1) : path;
+            fieldErrors.putIfAbsent(field, violation.getMessage());
+        }
+        return validationResponse(fieldErrors);
+    }
+
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MissingServletRequestParameterException.class,
+            MethodArgumentTypeMismatchException.class
+    })
+    public ResponseEntity<Map<String, Object>> handleBadRequest(Exception ex) {
+        Map<String, Object> fieldErrors = new LinkedHashMap<>();
+        fieldErrors.put("request", "请求参数格式不正确");
+        return validationResponse(fieldErrors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleUnexpected(HttpServletRequest request, Exception ex) {
+        log.error("未处理异常 {} {}", request.getMethod(), request.getRequestURI(), ex);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", ErrorCodes.INTERNAL_ERROR);
+        body.put("message", "服务器内部错误，请稍后重试");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
+    }
+
+    private ResponseEntity<Map<String, Object>> validationResponse(Map<String, Object> fieldErrors) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("fieldErrors", fieldErrors);
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("code", ErrorCodes.VALIDATION_ERROR);
+        body.put("message", "请求参数校验失败");
+        body.put("details", details);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+}
