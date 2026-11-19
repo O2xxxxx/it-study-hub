@@ -20,7 +20,7 @@
 
 ## 二、环境依赖
 
-- JDK 17（必须 17，JDK 22 会让 Lombok 编译失败）
+- JDK 25（LTS；构建和运行后端均使用 Java 25）
 - Maven 3.9+（本仓库自带 `.tools/apache-maven-3.9.9`）
 - MySQL 8.0（本仓库自带便携版 `.tools/mysql-8.0.29-winx64`，端口 3307）
 - Node.js 18+ 与 npm 10+（开发机使用 Node 24 / npm 11）

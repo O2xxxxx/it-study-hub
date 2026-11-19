@@ -12,7 +12,7 @@
 ```
 JavaEE lastwork/
 ├── backend/                       Spring Boot 后端（Controller / Service / Mapper 三层）
-│   ├── pom.xml                    JDK 17 + Spring Boot 3.2.5 + MyBatis-Plus 3.5.7
+│   ├── pom.xml                    JDK 25 + Spring Boot 3.5.16 + MyBatis-Plus 3.5.7
 │   └── src/
 │       ├── main/java/com/itstudy/
 │       │   ├── ItStudyApplication.java
