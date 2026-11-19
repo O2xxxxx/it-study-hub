@@ -2,14 +2,13 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
-import { Wallet } from 'lucide-react'
+import { ChevronRight, UserPlus, Users, Wallet } from 'lucide-react'
 import { toast } from 'sonner'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ArticleCardItem } from '@/features/articles/ArticleCard'
 import { QuestionCardItem } from '@/features/questions/QuestionCard'
@@ -187,36 +186,57 @@ function Connections({ username, kind, count }: { username: string; kind: 'follo
   const [open, setOpen] = useState(false)
   const [page, setPage] = useState(1)
   const label = kind === 'followers' ? '粉丝' : '关注'
+  const Icon = kind === 'followers' ? Users : UserPlus
   const list = useAsync(() => open ? api.userConnections(username, kind, page) : Promise.resolve(null),
     [open, username, kind, page, count])
+  const totalPages = list.data?.totalPages ?? 1
 
   return (
-    <Sheet open={open} onOpenChange={value => { setOpen(value); if (!value) setPage(1) }}>
-      <SheetTrigger asChild>
-        <button type="button" className="rounded-sm hover:text-primary focus-visible:ring-2 focus-visible:ring-ring">
+    <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) setPage(1) }}>
+      <DialogTrigger asChild>
+        <button type="button" className="rounded-sm transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {label} <span className="tabular-nums">{count}</span>
         </button>
-      </SheetTrigger>
-      <SheetContent className="overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{label}</SheetTitle>
-          <SheetDescription>@{username} 的{label}列表</SheetDescription>
-        </SheetHeader>
-        <div className="my-6">
+      </DialogTrigger>
+      <DialogContent
+        className="glass-3 max-w-md gap-0 overflow-hidden rounded-2xl border-border/70 bg-popover/95 p-0 backdrop-blur-2xl"
+        data-testid={kind === 'followers' ? 'followers-dialog' : 'following-dialog'}
+      >
+        <DialogHeader className="border-b border-border/70 px-5 pb-4 pt-5">
+          <DialogTitle className="flex items-center gap-2 pr-0 text-base">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Icon className="size-4" aria-hidden />
+            </span>
+            {label}
+          </DialogTitle>
+          <DialogDescription>
+            @{username} 的{label} · 共 <span className="tabular-nums">{count}</span> 人
+          </DialogDescription>
+        </DialogHeader>
+        <div className="max-h-[min(60vh,24rem)] overflow-y-auto overscroll-contain px-2 py-2">
           {list.loading ? <LoadingRows rows={3} /> : list.error ? (
             <ErrorBlock message={list.error} onRetry={list.reload} />
           ) : list.data?.items.length ? (
-            <ul className="divide-y">
+            <ul className="space-y-0.5">
               {list.data.items.map(person => (
-                <li key={person.id} className="py-3">
-                  {person.deleted ? <span className="text-sm text-muted-foreground">{person.nickname}</span> : (
-                    <Link to={'/u/' + encodeURIComponent(person.username)} onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 rounded-md hover:text-primary focus-visible:ring-2 focus-visible:ring-ring">
-                      <Avatar name={person.nickname} hue={person.avatarHue} size={32} />
-                      <span className="min-w-0">
+                <li key={person.id}>
+                  {person.deleted ? (
+                    <div className="flex items-center gap-3 rounded-xl px-3 py-2">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground">注销</span>
+                      <span className="truncate text-sm text-muted-foreground">{person.nickname}</span>
+                    </div>
+                  ) : (
+                    <Link
+                      to={'/u/' + encodeURIComponent(person.username)}
+                      onClick={() => setOpen(false)}
+                      className="group flex items-center gap-3 rounded-xl px-3 py-2 transition-colors hover:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Avatar name={person.nickname} hue={person.avatarHue} size={36} />
+                      <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">{person.nickname}</span>
-                        <span className="block text-xs text-muted-foreground">@{person.username}</span>
+                        <span className="block truncate text-xs text-muted-foreground">@{person.username}</span>
                       </span>
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden />
                     </Link>
                   )}
                 </li>
@@ -224,8 +244,12 @@ function Connections({ username, kind, count }: { username: string; kind: 'follo
             </ul>
           ) : <EmptyState title={'暂无' + label} />}
         </div>
-        <Pager page={page} totalPages={list.data?.totalPages ?? 1} onChange={setPage} />
-      </SheetContent>
-    </Sheet>
+        {totalPages > 1 && (
+          <div className="border-t border-border/70 px-3 py-3">
+            <Pager page={page} totalPages={totalPages} onChange={setPage} />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }

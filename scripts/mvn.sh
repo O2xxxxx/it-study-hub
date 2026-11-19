@@ -3,7 +3,7 @@
 set -uo pipefail
 ROOT_POSIX="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="$(cygpath -m "$ROOT_POSIX")"
-JAVA_DIR="${JAVA_HOME:-C:/Program Files/Java/jdk-25}"
+JAVA_DIR="${JAVA_HOME:-C:/Program Files/Java/jdk-17}"
 MVN_HOME="$ROOT/.tools/apache-maven-3.9.9"
 repo_args=()
 if [[ -n "${MAVEN_REPO_LOCAL:-}" ]]; then

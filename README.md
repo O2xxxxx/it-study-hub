@@ -20,7 +20,7 @@
 
 ## 二、环境依赖
 
-- JDK 25（LTS；构建和运行后端均使用 Java 25）
+- JDK 17（LTS；课程指定版本，构建和运行后端均使用 Java 17；若安装路径不同，请将 `JAVA_HOME` 指向 JDK 17）
 - Maven 3.9+（本仓库自带 `.tools/apache-maven-3.9.9`）
 - MySQL 8.0（本仓库自带便携版 `.tools/mysql-8.0.29-winx64`，端口 3307）
 - Node.js 18+ 与 npm 10+（开发机使用 Node 24 / npm 11）

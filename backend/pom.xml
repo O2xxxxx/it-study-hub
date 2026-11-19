@@ -18,7 +18,7 @@
   <description>IT 学习天地 - JavaEE 课程设计</description>
 
   <properties>
-    <java.version>25</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mybatis-plus.version>3.5.7</mybatis-plus.version>
     <lombok.version>1.18.48</lombok.version>

@@ -223,9 +223,15 @@ try {
   await fans.click()
   const sheet = page.getByRole('dialog', { name: '粉丝' })
   await sheet.getByRole('link', { name: /E2E 验证员/ }).waitFor()
+  const box = await sheet.boundingBox()
+  const viewport = page.viewportSize()
+  const centered = !!box && !!viewport
+    && Math.abs(box.x + box.width / 2 - viewport.width / 2) < 12
+    && box.height < viewport.height * 0.9
+  check('粉丝弹层居中展示新关系（非侧边抽屉）', centered, box ? 'x=' + Math.round(box.x) + ' w=' + Math.round(box.width) + ' h=' + Math.round(box.height) : 'no box')
   await page.keyboard.press('Escape')
   await sheet.waitFor({ state: 'hidden' })
-  check('粉丝抽屉展示新关系并还原焦点', await fans.evaluate(el => document.activeElement === el))
+  check('粉丝弹层关闭后还原焦点', await fans.evaluate(el => document.activeElement === el))
 
   await page.goto(BASE + '/articles/1', { waitUntil: 'networkidle' })
   const beforeLike = (await apiJSON('/api/articles/1')).body.likeCount

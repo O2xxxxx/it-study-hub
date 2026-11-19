@@ -12,7 +12,7 @@
 ```
 JavaEE lastwork/
 ├── backend/                       Spring Boot 后端（Controller / Service / Mapper 三层）
-│   ├── pom.xml                    JDK 25 + Spring Boot 3.5.16 + MyBatis-Plus 3.5.7
+│   ├── pom.xml                    JDK 17 + Spring Boot 3.5.16 + MyBatis-Plus 3.5.7
 │   └── src/
 │       ├── main/java/com/itstudy/
 │       │   ├── ItStudyApplication.java
@@ -423,6 +423,12 @@ erDiagram
 ![文章点赞态](screenshots/20-article-liked.png)
 
 从文章作者进入主页。已点赞的心形呈蓝色实心，按钮和数量与列表同步。
+
+### 21. 粉丝 / 关注弹层（居中玻璃面板）
+
+![粉丝弹层](screenshots/21-followers-dialog.png)
+
+粉丝与关注共用同一个居中 Dialog，不再从侧边抽出抽屉：标题、人数、成员列表和分页都收在 `glass-3` 面板内，与顶栏、全局搜索使用同一套描边、模糊和阴影；Esc 关闭后焦点回到「粉丝 3」入口，点击成员直接进入对方主页。暗色主题与 390 × 844 手机端已实测为同样的居中布局。
 
 ## 五、关键代码与说明
 
