@@ -22,7 +22,7 @@ req() {
   local jar="$1" m="$2" p="$3" body=""
   if [ $# -ge 4 ]; then body="$4"; fi
   if [ -n "$body" ]; then
-    curl -sS -X "$m" "$BASE$p" -H 'Content-Type: application/json' -b "$jar" -c "$jar" -d "$body" -w '\n%{http_code}'
+    printf '%s' "$body" | curl -sS -X "$m" "$BASE$p" -H 'Content-Type: application/json' -b "$jar" -c "$jar" --data-binary @- -w '\n%{http_code}'
   else
     curl -sS -X "$m" "$BASE$p" -b "$jar" -c "$jar" -w '\n%{http_code}'
   fi
@@ -96,9 +96,11 @@ say "== 9. 并发兑换同一资源 =="
 req "$J2" POST /api/articles '{"title":"乙的验收文章","sectionId":2,"contentMd":"内容"}' > /dev/null
 req "$J2" POST /api/questions/2/answers '{"contentMd":"乙的回答：动态 SQL 与索引。"}' > /dev/null
 R=$(req "$J2" GET /api/points); B=$(body_of "$R"); expect "并发前余额" 8 "$(jqv "$B" balance)"
-req "$J2" POST /api/resources/2/exchange > "$TMP/c1.txt" &
+cp "$J2" "$TMP/jar1"
+cp "$J2" "$TMP/jar2"
+req "$TMP/jar1" POST /api/resources/2/exchange > "$TMP/c1.txt" &
 P1=$!
-req "$J2" POST /api/resources/2/exchange > "$TMP/c2.txt" &
+req "$TMP/jar2" POST /api/resources/2/exchange > "$TMP/c2.txt" &
 P2=$!
 wait $P1 $P2
 R=$(req "$J2" GET /api/points); B=$(body_of "$R")
@@ -126,6 +128,35 @@ R=$(req "$J1" POST /api/favorites/toggle '{"targetType":"article","targetId":1}'
 expect "收藏" true "$(jqv "$B" favorited)"
 R=$(req "$J1" POST /api/questions/1/accept '{"answerId":1}')
 expect "非提问者采纳 403" 403 "$(status_of "$R")"
+
+
+say "== 12. 用户主页 / 点赞 / 关注 =="
+R=$(req "$G" GET /api/users/teacher); expect "游客看公开主页" 200 "$(status_of "$R")"
+R=$(req "$G" GET /api/users/teacher/articles); expect "游客看用户文章" 200 "$(status_of "$R")"
+R=$(req "$G" GET /api/users/teacher/questions); expect "游客看用户问答" 200 "$(status_of "$R")"
+R=$(req "$G" GET /api/users/teacher/following); expect "游客看关注列表" 200 "$(status_of "$R")"
+R=$(req "$G" POST /api/users/teacher/follow); expect "游客关注 401" 401 "$(status_of "$R")"
+R=$(req "$J1" POST "/api/users/$U1/follow"); expect "关注自己 400" 400 "$(status_of "$R")"
+R=$(req "$J1" POST "/api/users/$U2/follow"); B=$(body_of "$R")
+expect "首次关注粉丝 +1" 1 "$(jqv "$B" followerCount)"
+R=$(req "$J1" POST "/api/users/$U2/follow"); B=$(body_of "$R")
+expect "重复关注幂等" 1 "$(jqv "$B" followerCount)"
+R=$(req "$G" GET "/api/users/$U2/followers"); B=$(body_of "$R")
+expect "粉丝列表包含关注者" "$U1" "$(jqv "$B" username)"
+R=$(req "$J1" POST "/api/users/$U2/unfollow"); B=$(body_of "$R")
+expect "取消关注恢复粉丝数" 0 "$(jqv "$B" followerCount)"
+LIKE="{\"targetType\":\"article\",\"targetId\":$ART_ID,\"liked\":true}"
+R=$(req "$G" POST /api/likes/toggle "$LIKE"); expect "游客点赞 401" 401 "$(status_of "$R")"
+R=$(req "$J2" POST /api/likes/toggle "$LIKE"); B=$(body_of "$R")
+expect "首次点赞计数为 1" 1 "$(jqv "$B" count)"
+R=$(req "$J2" POST /api/likes/toggle "$LIKE"); B=$(body_of "$R")
+expect "重复点赞幂等" 1 "$(jqv "$B" count)"
+R=$(req "$J2" GET "/api/articles/$ART_ID"); B=$(body_of "$R")
+expect "文章详情返回当前点赞态" true "$(jqv "$B" likedByMe)"
+R=$(req "$J2" POST /api/likes/toggle "{\"targetType\":\"article\",\"targetId\":$ART_ID,\"liked\":false}"); B=$(body_of "$R")
+expect "取消点赞恢复计数" 0 "$(jqv "$B" count)"
+R=$(req "$J1" GET /api/points); B=$(body_of "$R")
+expect "兑换流水链接指向资源" /resources/1 "$(jqv "$B" targetPath)"
 
 say ""
 say "================ PASS=$PASS  FAIL=$FAIL ================"

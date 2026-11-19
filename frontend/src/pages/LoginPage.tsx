@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { errorMessage, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock } from '@/features/common/ui'
-import { fade, spring } from '@/lib/motion'
+import { fade } from '@/lib/motion'
 
 const DEMO = [
   { username: 'teacher', password: 'teach1234', note: '讲师，19 分' },
@@ -61,9 +61,7 @@ export default function LoginPage() {
   return (
     <div className="container flex min-h-[calc(100vh-9rem)] items-center justify-center py-10">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={spring.gentle}
+        {...fade}
         className="w-full max-w-4xl overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-lift backdrop-blur-xl lg:grid lg:grid-cols-[1.05fr_1fr]"
       >
         <div className="hidden flex-col justify-between gap-8 border-r border-border/60 bg-primary/[0.04] p-9 lg:flex">

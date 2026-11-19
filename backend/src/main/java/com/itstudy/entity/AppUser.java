@@ -11,6 +11,8 @@ public class AppUser {
 
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Integer followerCount;
+    private Integer followingCount;
     private String username;
     private String passwordHash;
     private String nickname;

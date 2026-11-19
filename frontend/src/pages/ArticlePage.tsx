@@ -1,3 +1,5 @@
+import { LikeButton } from '@/features/likes/LikeButton'
+import { AuthorLink } from '@/features/profile/AuthorLink'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Eye, PenLine, Sparkles } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
@@ -87,14 +89,14 @@ export default function ArticlePage() {
             ) : null}
           </div>
 
-          <h1 className="mt-3 text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+          <h1 className="page-title mt-3 text-balance">
             {article.title}
           </h1>
 
           <div className="mt-4 flex flex-wrap items-center gap-3 border-b border-border/70 pb-4">
             <Avatar name={article.author.nickname} hue={article.author.avatarHue} size={32} />
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{article.author.nickname}</p>
+              <AuthorLink username={article.author.username} className="block truncate text-sm font-medium">{article.author.nickname}</AuthorLink>
               <p className="text-[11px] text-muted-foreground">
                 {formatDateTime(article.createdAt)}
                 {article.updatedAt && article.updatedAt !== article.createdAt
@@ -115,11 +117,12 @@ export default function ArticlePage() {
                   </Link>
                 </Button>
               ) : null}
+              <LikeButton type="article" id={article.id} count={article.likeCount} liked={article.likedByMe} />
               <FavoriteButton targetType="article" targetId={article.id} initialFavorited={article.favorite} showLabel />
             </div>
           </div>
 
-          <MarkdownView html={article.contentHtml} className="mt-6" />
+          <MarkdownView html={article.contentHtml} pageTitle={article.title} className="mt-6" />
 
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/70 bg-card/60 p-4">
             <p className="text-sm text-muted-foreground">觉得有用？收藏起来，下次直接从「我的收藏」打开。</p>

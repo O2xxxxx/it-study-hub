@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge'
 import { cn, formatFileSize } from '@/lib/utils'
 import type { ResourceCard } from '@/lib/types'
 import { ScrollLink } from '@/features/common/ui'
-import { paletteFor } from '@/features/common/sectionTheme'
 
 function iconForType(fileType?: string | null) {
   const value = (fileType ?? '').toLowerCase()
@@ -20,19 +19,17 @@ interface ResourceCardItemProps {
 }
 
 export function ResourceCardItem({ resource, className }: ResourceCardItemProps) {
-  const palette = paletteFor(resource.sectionCode)
   const Icon = iconForType(resource.fileType)
   return (
     <ScrollLink
       to={'/resources/' + resource.id}
       className={cn(
-        'group flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-4 transition',
-        'hover:border-primary/30 hover:shadow-glass focus-visible:outline-none',
+        'content-card group flex flex-col gap-3 rounded-2xl border bg-card p-5',
         className,
       )}
     >
       <div className="flex items-start gap-3">
-        <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-lg', palette.chip)}>
+        <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-lg', 'text-primary')}>
           <Icon className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
@@ -58,9 +55,9 @@ export function ResourceCardItem({ resource, className }: ResourceCardItemProps)
       <div className="mt-auto flex items-center justify-between border-t border-border/60 pt-2.5">
         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
           <Lock className="size-3" aria-hidden />
-          {resource.owned ? '可直接下载' : '下载需兑换'}
+          {resource.owned ? '下载' : '所需积分'}
         </span>
-        <span className="text-sm font-semibold tabular-nums text-primary">{resource.points} 积分</span>
+        <span className="text-sm font-semibold tabular-nums text-primary">{resource.owned ? null : resource.points + ' 积分'}</span>
       </div>
     </ScrollLink>
   )

@@ -1,3 +1,5 @@
+import { LikeButton } from '@/features/likes/LikeButton'
+import { AuthorLink } from '@/features/profile/AuthorLink'
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion } from 'motion/react'
@@ -19,7 +21,7 @@ import { paletteFor } from '@/features/common/sectionTheme'
 import { MarkdownView } from '@/features/markdown/MarkdownView'
 import { MarkdownEditor } from '@/features/markdown/MarkdownEditor'
 import { FavoriteButton } from '@/features/favorites/FavoriteButton'
-import { spring } from '@/lib/motion'
+import { fade } from '@/lib/motion'
 
 export default function QuestionPage() {
   const { id } = useParams()
@@ -132,13 +134,13 @@ export default function QuestionPage() {
                 </Badge>
               )}
             </div>
-            <h1 className="mt-3 text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+            <h1 className="page-title mt-3 text-balance">
               {question.title}
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-3 border-b border-border/70 pb-4">
               <Avatar name={question.author.nickname} hue={question.author.avatarHue} size={32} />
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{question.author.nickname}</p>
+                <AuthorLink username={question.author.username} className="block truncate text-sm font-medium">{question.author.nickname}</AuthorLink>
                 <p className="text-[11px] text-muted-foreground">提问于 {formatDateTime(question.createdAt)}</p>
               </div>
               <span className="inline-flex items-center gap-3 text-[11px] text-muted-foreground">
@@ -146,12 +148,13 @@ export default function QuestionPage() {
                 <span className="inline-flex items-center gap-1"><MessageSquare className="size-3.5" aria-hidden />{question.answerCount} 个回答</span>
               </span>
               <div className="ml-auto">
-                <FavoriteButton targetType="question" targetId={question.id} initialFavorited={question.favorite} showLabel />
+                <LikeButton type="question" id={question.id} count={question.likeCount} liked={question.likedByMe} />
+              <FavoriteButton targetType="question" targetId={question.id} initialFavorited={question.favorite} showLabel />
               </div>
             </div>
           </header>
 
-          <MarkdownView html={question.contentHtml} className="mt-6" />
+          <MarkdownView html={question.contentHtml} pageTitle={question.title} className="mt-6" />
 
           <section className="mt-10" aria-labelledby="answers-heading">
             <h2 id="answers-heading" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
@@ -170,9 +173,7 @@ export default function QuestionPage() {
                 answers.map((answer) => (
                   <motion.article
                     key={answer.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={spring.soft}
+                    {...fade}
                     className={cn(
                       'rounded-2xl border bg-card/70 p-5',
                       answer.accepted ? 'border-success/50 bg-success/[0.06] ring-1 ring-success/20' : 'border-border/70',
@@ -182,7 +183,7 @@ export default function QuestionPage() {
                       <Avatar name={answer.author.nickname} hue={answer.author.avatarHue} size={30} />
                       <div className="min-w-0">
                         <p className="text-sm font-medium">
-                          {answer.author.nickname}
+                          <AuthorLink username={answer.author.username}>{answer.author.nickname}</AuthorLink>
                           {answer.isMine ? <span className="ml-1 text-[11px] text-muted-foreground">（我）</span> : null}
                         </p>
                         <p className="text-[11px] text-muted-foreground">{formatDateTime(answer.createdAt)}</p>

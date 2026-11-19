@@ -11,6 +11,7 @@ public class Question {
 
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Integer likeCount;
     private Long sectionId;
     private Long authorId;
     private String title;

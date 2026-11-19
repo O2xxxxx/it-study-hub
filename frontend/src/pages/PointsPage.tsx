@@ -10,7 +10,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { errorMessage, useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, LoadingRows, PageShell, Segmented } from '@/features/common/ui'
 import { AnimatedNumber } from '@/features/common/AnimatedNumber'
-import { spring } from '@/lib/motion'
+import { fade } from '@/lib/motion'
 
 const REASON_LABEL: Record<string, string> = {
   ARTICLE_REWARD: '发布文章奖励',
@@ -53,9 +53,8 @@ export default function PointsPage() {
     <PageShell>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-primary">积分中心</p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">我的积分</h1>
-          <p className="mt-1 text-sm text-muted-foreground">发文章 +5，答题 +3，兑换资料按所需积分扣减。所有数字都来自服务端。</p>
+          <h1 className="page-title">我的积分</h1>
+          <p className="mt-1 text-sm text-muted-foreground">查看积分收支和已兑换的资料。</p>
         </div>
         <Button asChild variant="outline">
           <Link to="/articles/new">去写一篇文章赚 5 分</Link>
@@ -63,9 +62,7 @@ export default function PointsPage() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={spring.gentle}
+        {...fade}
         className="mt-6 grid gap-4 sm:grid-cols-3"
       >
         <div className="rounded-2xl border border-primary/25 bg-primary/[0.07] p-5 backdrop-blur-md">
@@ -129,19 +126,14 @@ export default function PointsPage() {
               action={<Button asChild><Link to="/qa">去看看别人在问什么</Link></Button>}
             />
           ) : (
-            <motion.ul
-              initial="hidden"
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.04 } } }}
+            <ul
               className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/70 bg-card/60"
             >
               {data.logs.map((log) => {
                 const positive = log.changeAmount > 0
                 return (
-                  <motion.li
+                  <li
                     key={log.id}
-                    variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
-                    transition={spring.soft}
                     className="flex flex-wrap items-center gap-3 px-4 py-3.5"
                   >
                     <span
@@ -161,23 +153,15 @@ export default function PointsPage() {
                         {formatDateTime(log.createdAt)} · 变动后余额 {log.balanceAfter} 分
                       </p>
                     </div>
-                    {log.refType === 'RESOURCE' ? (
+                    {log.targetPath ? (
                       <Button asChild variant="ghost" size="sm">
-                        <Link to={'/resources/' + log.refId}>查看资料</Link>
-                      </Button>
-                    ) : log.refType === 'ARTICLE' ? (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link to={'/articles/' + log.refId}>查看文章</Link>
-                      </Button>
-                    ) : log.refType === 'QUESTION' ? (
-                      <Button asChild variant="ghost" size="sm">
-                        <Link to={'/qa/' + log.refId}>查看问题</Link>
+                        <Link to={log.targetPath}>查看来源</Link>
                       </Button>
                     ) : null}
-                  </motion.li>
+                  </li>
                 )
               })}
-            </motion.ul>
+            </ul>
           )
         ) : !data || data.exchanges.length === 0 ? (
           <EmptyState

@@ -1,36 +1,39 @@
-import type { Transition } from 'motion/react'
+import type { Transition, Variants } from 'motion/react'
 
-export const DURATION = {
-  instant: 0.09,
-  fast: 0.18,
-  base: 0.26,
-  slow: 0.42,
-  slower: 0.62,
+export const duration = {
+  feedback: 0.12,
+  state: 0.18,
+  panel: 0.24,
+  close: 0.16,
+  page: 0.32,
 } as const
 
-export const EASE = {
-  out: [0.22, 1, 0.36, 1] as const,
-  inOut: [0.65, 0, 0.35, 1] as const,
-  springSoft: [0.34, 1.28, 0.5, 1] as const,
-}
+export const ease = [0.22, 1, 0.36, 1] as const
 
 export const spring = {
-  snappy: { type: 'spring', stiffness: 460, damping: 34, mass: 0.7 } as Transition,
-  gentle: { type: 'spring', stiffness: 260, damping: 30, mass: 0.9 } as Transition,
-  soft: { type: 'spring', stiffness: 180, damping: 26, mass: 1 } as Transition,
-  layout: { type: 'spring', stiffness: 380, damping: 38, mass: 0.8 } as Transition,
+  snappy: { type: 'spring', stiffness: 380, damping: 30 } satisfies Transition,
+  gentle: { type: 'spring', stiffness: 320, damping: 26 } satisfies Transition,
+  soft: { type: 'spring', stiffness: 260, damping: 22 } satisfies Transition,
 }
 
-export const fade = {
-  initial: { opacity: 0, y: 6 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 4 },
-  transition: { duration: DURATION.base, ease: EASE.out },
+export const overlayVariants: Variants = {
+  closed: { opacity: 0, transition: { duration: duration.close, ease } },
+  open: { opacity: 1, transition: { duration: duration.state, ease } },
 }
 
-export const pageTransition = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -6 },
-  transition: { duration: DURATION.base, ease: EASE.out },
+export const panelVariants: Variants = {
+  closed: { opacity: 0, scale: 0.97, y: 6, transition: { duration: duration.close, ease } },
+  open: { opacity: 1, scale: 1, y: 0, transition: { duration: duration.panel, ease } },
 }
+
+export const listItemVariants: Variants = {
+  closed: { opacity: 0, y: 6, transition: { duration: duration.close, ease } },
+  open: { opacity: 1, y: 0, transition: { duration: duration.state, ease } },
+}
+
+export const pageVariants: Variants = {
+  closed: { opacity: 0, y: 8, transition: { duration: duration.page, ease } },
+  open: { opacity: 1, y: 0, transition: { duration: duration.page, ease } },
+}
+
+export const fade = { initial: 'closed', animate: 'open', exit: 'closed', variants: listItemVariants }

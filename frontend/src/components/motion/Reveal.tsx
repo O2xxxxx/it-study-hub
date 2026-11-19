@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { DURATION, EASE } from '@/lib/motion'
+import { duration, ease } from '@/lib/motion'
 
 /**
  * 滚动进入视口时淡入上移。位移只在允许动效时发生，
@@ -31,8 +31,8 @@ export function Reveal({
       viewport={{ once, amount, margin: '0px 0px -72px 0px' }}
       transition={
         reduce
-          ? { duration: DURATION.fast }
-          : { duration: DURATION.slow, ease: EASE.out, delay }
+          ? { duration: duration.feedback }
+          : { duration: duration.state, ease: ease, delay }
       }
     >
       {children}

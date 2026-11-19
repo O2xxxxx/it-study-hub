@@ -3,10 +3,14 @@ import { readFileSync, writeFileSync, mkdirSync, mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, dirname } from "node:path"
 
-const CHROME = "C:/Program Files/Google/Chrome/Application/chrome.exe"
-const PORT = 9333
+const CHROME = process.env.ITSTUDY_CHROME ?? "C:/Program Files/Google/Chrome/Application/chrome.exe"
+const PORT = Number(process.env.ITSTUDY_CDP_PORT ?? 9333)
+const BASE = process.env.ITSTUDY_WEB_ORIGIN ?? "http://127.0.0.1:5173"
 const planPath = process.argv[2]
 const plan = JSON.parse(readFileSync(planPath, "utf8"))
+const names = process.argv.slice(3)
+const shots = names.length ? plan.shots.filter(step => names.includes(step.name)) : plan.shots
+if (names.some(name => !shots.some(shot => shot.name === name))) throw new Error("unknown screenshot name")
 const profile = mkdtempSync(join(tmpdir(), "shoot-"))
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -60,31 +64,31 @@ async function main() {
   await c.send("Runtime.enable")
   await c.send("Network.enable")
   const results = []
-  const session = plan.session
 
-  for (const step of plan.shots) {
+  for (const step of shots) {
     const w = step.w || 1440, h = step.h || 960
     await c.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: !!step.mobile })
     if (step.resetCookie !== false) {
       await c.send("Network.clearBrowserCookies")
     }
     if (step.user) {
-      const res = await fetch("http://127.0.0.1:8080/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: step.user, password: step.password }) })
+      const res = await fetch(BASE + "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: step.user, password: step.password }) })
       const list = res.headers.getSetCookie ? res.headers.getSetCookie() : []
       const raw = list.join(";")
       const m = raw.match(/ITSESSION=([^;]+)/)
-      if (m) await c.send("Network.setCookie", { name: "ITSESSION", value: m[1], url: "http://127.0.0.1:5173/" })
+      if (!res.ok || !m) throw new Error(step.name + ": login did not issue a session")
+      if (m) await c.send("Network.setCookie", { name: "ITSESSION", value: m[1], url: BASE + "/" })
       results.push({ shot: step.name, login: res.status, cookie: !!m })
     }
     await c.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: step.media || "light" }] })
-    await c.send("Page.navigate", { url: "http://127.0.0.1:5173/" })
+    await c.send("Page.navigate", { url: BASE + "/" })
     await sleep(700)
     await c.send("Runtime.evaluate", { expression: "(() => { localStorage.setItem('itstudy-theme', " + JSON.stringify(step.theme || "light") + "); return 'ok'; })()" })
     if (step.init) {
       await c.send("Runtime.evaluate", { expression: step.init, awaitPromise: true })
       await sleep(200)
     }
-    const url = "http://127.0.0.1:5173" + step.url
+    const url = BASE + step.url
     await c.send("Page.navigate", { url })
     for (let i = 0; i < 60; i++) {
       const st = await c.send("Runtime.evaluate", { expression: "document.readyState", returnByValue: true })
@@ -131,6 +135,13 @@ async function main() {
       const ev = await c.send("Runtime.evaluate", { expression: act.js, awaitPromise: true, returnByValue: true })
       if (ev.result && ev.result.exceptionDetails) results.push({ shot: step.name, actionError: ev.result.exceptionDetails.text })
       await sleep(act.wait == null ? 700 : act.wait)
+    }
+    if (step.expectSelector) {
+      const evidence = await c.send("Runtime.evaluate", {
+        expression: "Boolean(document.querySelector(" + JSON.stringify(step.expectSelector) + "))",
+        returnByValue: true,
+      })
+      if (!evidence.result?.result?.value) throw new Error(step.name + ": expected " + step.expectSelector)
     }
     const probe = await c.send("Runtime.evaluate", { expression: "JSON.stringify({ dialog: !!document.querySelector('[role=dialog]'), popover: !!document.querySelector('[data-radix-popper-content-wrapper]'), dark: document.documentElement.classList.contains('dark'), title: document.title, url: location.pathname })", returnByValue: true })
     results.push({ shot: step.name, probe: probe.result && probe.result.result && probe.result.result.value })

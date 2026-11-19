@@ -16,14 +16,20 @@ public interface ArticleMapper extends BaseMapper<Article> {
     @Select("""
             <script>
             SELECT a.id, a.title, a.summary, a.section_id, s.code AS section_code, s.name AS section_name,
-                   a.author_id, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
+                   a.author_id, u.username AS author_username, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
                    a.reward_granted, a.view_count, a.created_at,
                    <choose>
                        <when test="userId != null">
                            EXISTS (SELECT 1 FROM favorite f WHERE f.user_id = #{userId} AND f.target_type = 'article' AND f.target_id = a.id)
                        </when>
                        <otherwise>0</otherwise>
-                   </choose> AS favorite
+                   </choose> AS favorite, a.like_count,
+                   <choose>
+                       <when test="userId != null">
+                           EXISTS (SELECT 1 FROM post_like l WHERE l.user_id = #{userId} AND l.target_type = 'article' AND l.target_id = a.id)
+                       </when>
+                       <otherwise>0</otherwise>
+                   </choose> AS liked_by_me
             FROM article a
             LEFT JOIN section s ON s.id = a.section_id
             LEFT JOIN app_user u ON u.id = a.author_id
@@ -60,4 +66,10 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     @Update("UPDATE article SET view_count = view_count + 1 WHERE id = #{id}")
     int incrementView(@Param("id") Long id);
+
+    @Select("SELECT like_count FROM article WHERE id = #{id} FOR UPDATE")
+    Integer lockLikeCount(@Param("id") Long id);
+
+    @Update("UPDATE article SET like_count = GREATEST(CAST(like_count AS SIGNED) + #{delta}, 0) WHERE id = #{id}")
+    int adjustLikes(@Param("id") Long id, @Param("delta") int delta);
 }

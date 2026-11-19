@@ -67,3 +67,14 @@ INSERT INTO favorite (user_id, target_type, target_id, created_at) VALUES
  (2, 'ARTICLE', 1, '2026-09-21 09:00:00'),
  (2, 'RESOURCE', 3, '2026-09-30 09:00:00'),
  (3, 'ARTICLE', 5, '2026-09-26 09:00:00');
+
+-- 社交演示数据。内容 ID 由 seed-content.sql 和 seed-qa.sql 固定。
+INSERT INTO user_follow (follower_id, followee_id) VALUES
+ (1, 2), (2, 1), (2, 3), (3, 1), (4, 2);
+
+INSERT INTO post_like (user_id, target_type, target_id) VALUES
+ (1, 'article', 3), (2, 'article', 1), (3, 'article', 1), (4, 'article', 4),
+ (1, 'question', 2), (2, 'question', 1), (3, 'question', 2), (4, 'question', 5);
+UPDATE app_user u
+SET follower_count = (SELECT COUNT(*) FROM user_follow f WHERE f.followee_id = u.id),
+    following_count = (SELECT COUNT(*) FROM user_follow f WHERE f.follower_id = u.id);

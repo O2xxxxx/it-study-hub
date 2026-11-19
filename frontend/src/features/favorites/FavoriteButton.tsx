@@ -83,10 +83,10 @@ export function FavoriteButton({
       aria-label={favorited ? '取消收藏' : '收藏'}
       disabled={pending}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition',
+        'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium leading-none transition',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
         favorited
-          ? 'border-warning/40 bg-warning/10 text-warning-foreground dark:text-warning'
+          ? 'border-warning/40 bg-warning/10 text-warning'
           : 'border-border/80 bg-card/70 text-muted-foreground hover:border-primary/40 hover:text-primary',
         className,
       )}

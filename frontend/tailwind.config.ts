@@ -42,9 +42,11 @@ export default {
         glass: '0 1px 0 0 hsl(0 0% 100% / 0.5) inset, 0 12px 32px -12px hsl(215 40% 20% / 0.22)',
         lift: '0 18px 48px -20px hsl(215 45% 18% / 0.35)',
       },
+      transitionDuration: { DEFAULT: 'var(--motion-state)' },
       transitionTimingFunction: {
-        spring: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        'spring-soft': 'cubic-bezier(0.34, 1.28, 0.5, 1)',
+        DEFAULT: 'var(--motion-ease)',
+        spring: 'var(--motion-ease)',
+        'spring-soft': 'var(--motion-ease)',
       },
     },
   },

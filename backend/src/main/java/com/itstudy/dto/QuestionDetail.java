@@ -8,6 +8,8 @@ import java.util.List;
 public class QuestionDetail {
 
     private Long id;
+    private int likeCount;
+    private boolean likedByMe;
     private String title;
     private String summary;
     private String contentMd;

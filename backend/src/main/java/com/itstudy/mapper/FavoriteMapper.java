@@ -30,8 +30,9 @@ public interface FavoriteMapper extends BaseMapper<Favorite> {
 
     @Select("""
             SELECT a.id, a.title, a.summary, a.section_id, s.code AS section_code, s.name AS section_name,
-                   a.author_id, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
-                   a.reward_granted, a.view_count, a.created_at, 1 AS favorite
+                   a.author_id, u.username AS author_username, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
+                   a.reward_granted, a.view_count, a.created_at, 1 AS favorite, a.like_count,
+                   EXISTS (SELECT 1 FROM post_like l WHERE l.user_id = #{userId} AND l.target_type = 'article' AND l.target_id = a.id) AS liked_by_me
             FROM favorite f
             JOIN article a ON a.id = f.target_id
             LEFT JOIN section s ON s.id = a.section_id
@@ -43,8 +44,9 @@ public interface FavoriteMapper extends BaseMapper<Favorite> {
 
     @Select("""
             SELECT q.id, q.title, q.section_id, s.code AS section_code, s.name AS section_name,
-                   q.author_id, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
-                   q.answer_count, q.solved, q.accepted_answer_id, q.view_count, q.created_at, 1 AS favorite
+                   q.author_id, u.username AS author_username, u.nickname AS author_name, u.avatar_hue AS author_avatar_hue,
+                   q.answer_count, q.solved, q.accepted_answer_id, q.view_count, q.created_at, 1 AS favorite, q.like_count,
+                   EXISTS (SELECT 1 FROM post_like l WHERE l.user_id = #{userId} AND l.target_type = 'question' AND l.target_id = q.id) AS liked_by_me
             FROM favorite f
             JOIN question q ON q.id = f.target_id
             LEFT JOIN section s ON s.id = q.section_id

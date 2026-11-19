@@ -2,6 +2,8 @@
 -- 测试基类使用 @Transactional，每个用例结束后回滚，因此这里不做任何清空。
 CREATE TABLE IF NOT EXISTS app_user (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  follower_count  INT UNSIGNED    NOT NULL DEFAULT 0,
+  following_count INT UNSIGNED    NOT NULL DEFAULT 0,
   username      VARCHAR(32)     NOT NULL,
   password_hash VARCHAR(100)    NOT NULL,
   nickname      VARCHAR(32)     NOT NULL,
@@ -29,6 +31,7 @@ CREATE TABLE IF NOT EXISTS section (
 
 CREATE TABLE IF NOT EXISTS article (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  like_count      INT UNSIGNED    NOT NULL DEFAULT 0,
   section_id     BIGINT UNSIGNED NOT NULL,
   author_id      BIGINT UNSIGNED NOT NULL,
   title          VARCHAR(120)    NOT NULL,
@@ -47,6 +50,7 @@ CREATE TABLE IF NOT EXISTS article (
 
 CREATE TABLE IF NOT EXISTS question (
   id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  like_count      INT UNSIGNED    NOT NULL DEFAULT 0,
   section_id         BIGINT UNSIGNED NOT NULL,
   author_id          BIGINT UNSIGNED NOT NULL,
   title              VARCHAR(160)    NOT NULL,
@@ -117,7 +121,7 @@ CREATE TABLE IF NOT EXISTS point_log (
   balance_after INT             NOT NULL,
   reason_type   VARCHAR(32)     NOT NULL,
   reason_desc   VARCHAR(200)    NOT NULL,
-  ref_type      VARCHAR(16)     NULL,
+  ref_type      VARCHAR(32)     NULL,
   ref_id        BIGINT UNSIGNED NULL,
   created_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -152,3 +156,29 @@ CREATE TABLE IF NOT EXISTS draft (
   UNIQUE KEY uk_draft_slot (user_id, draft_type, draft_key),
   CONSTRAINT fk_draft_user FOREIGN KEY (user_id) REFERENCES app_user (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 点赞目标由业务事务验证和清理。
+CREATE TABLE IF NOT EXISTS post_like (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id     BIGINT UNSIGNED NOT NULL,
+  target_type VARCHAR(16)     NOT NULL,
+  target_id   BIGINT UNSIGNED NOT NULL,
+  created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_like_target (user_id, target_type, target_id),
+  KEY idx_like_post (target_type, target_id),
+  CONSTRAINT ck_like_type CHECK (target_type IN ('article', 'question'))
+) ENGINE=InnoDB;
+
+-- 保留历史关注。列表用 LEFT JOIN 显示已经注销的账号。
+CREATE TABLE IF NOT EXISTS user_follow (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  follower_id BIGINT UNSIGNED NOT NULL,
+  followee_id BIGINT UNSIGNED NOT NULL,
+  created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_follow_pair (follower_id, followee_id),
+  KEY idx_followee (followee_id, id),
+  KEY idx_follower (follower_id, id),
+  CONSTRAINT ck_follow_distinct CHECK (follower_id <> followee_id)
+) ENGINE=InnoDB;

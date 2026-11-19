@@ -5,6 +5,7 @@ import com.itstudy.config.PointsProperties;
 import com.itstudy.dto.ArticleForm;
 import com.itstudy.entity.Article;
 import com.itstudy.mapper.AppUserMapper;
+import com.itstudy.mapper.PostLikeMapper;
 import com.itstudy.mapper.ArticleMapper;
 import com.itstudy.mapper.FavoriteMapper;
 import com.itstudy.mapper.PointLogMapper;
@@ -41,7 +42,7 @@ class PermissionTest {
         PointsProperties points = new PointsProperties();
         points.setArticlePublish(5);
         points.setAnswerCreate(3);
-        articleService = new ArticleServiceImpl(articleMapper, sectionMapper, appUserMapper,
+        articleService = new ArticleServiceImpl(articleMapper, sectionMapper, appUserMapper, org.mockito.Mockito.mock(PostLikeMapper.class),
                 pointLogMapper, favoriteMapper, renderer, points);
     }
 

@@ -1,4 +1,4 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { CircleUser, FolderOpen, Home, LayoutGrid, MessagesSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -49,11 +49,11 @@ export function MobileBottomNav() {
             <li key={item.to}>
               <NavLink
                 to={item.to}
-                className="group flex flex-col items-center gap-1 pb-1.5 pt-2 transition-transform duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                className="group flex flex-col items-center gap-1 pb-1.5 pt-2 transition-transform motion-feedback active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
               >
                 <span
                   className={cn(
-                    'flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-200',
+                    'flex h-7 w-12 items-center justify-center rounded-full transition-colors',
                     active ? 'bg-primary/[0.12] text-primary' : 'text-muted-foreground group-hover:text-foreground',
                   )}
                 >

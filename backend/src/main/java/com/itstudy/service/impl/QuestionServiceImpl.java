@@ -21,6 +21,7 @@ import com.itstudy.entity.Question;
 import com.itstudy.entity.Section;
 import com.itstudy.mapper.AnswerMapper;
 import com.itstudy.mapper.AppUserMapper;
+import com.itstudy.mapper.PostLikeMapper;
 import com.itstudy.mapper.FavoriteMapper;
 import com.itstudy.mapper.PointLogMapper;
 import com.itstudy.mapper.QuestionMapper;
@@ -50,6 +51,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final AnswerMapper answerMapper;
     private final SectionMapper sectionMapper;
     private final AppUserMapper appUserMapper;
+    private final PostLikeMapper postLikeMapper;
     private final PointLogMapper pointLogMapper;
     private final FavoriteMapper favoriteMapper;
     private final MarkdownRenderer markdownRenderer;
@@ -59,6 +61,7 @@ public class QuestionServiceImpl implements QuestionService {
                                AnswerMapper answerMapper,
                                SectionMapper sectionMapper,
                                AppUserMapper appUserMapper,
+                              PostLikeMapper postLikeMapper,
                                PointLogMapper pointLogMapper,
                                FavoriteMapper favoriteMapper,
                                MarkdownRenderer markdownRenderer,
@@ -67,6 +70,7 @@ public class QuestionServiceImpl implements QuestionService {
         this.answerMapper = answerMapper;
         this.sectionMapper = sectionMapper;
         this.appUserMapper = appUserMapper;
+        this.postLikeMapper = postLikeMapper;
         this.pointLogMapper = pointLogMapper;
         this.favoriteMapper = favoriteMapper;
         this.markdownRenderer = markdownRenderer;
@@ -74,14 +78,14 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public PageResult<QuestionCard> page(String sectionCode, String filter, Integer page, Integer size, Long userId) {
+    public PageResult<QuestionCard> pageByAuthor(String sectionCode, String filter, Integer page, Integer size, Long userId, Long authorId) {
         int p = Pages.page(page);
         int s = Pages.size(size, 10);
-        long total = questionMapper.countCards(sectionCode, filter);
+        long total = questionMapper.countCards(sectionCode, filter, authorId);
         if (total <= 0) {
             return new PageResult<>(List.of(), p, s, 0);
         }
-        List<QuestionCard> items = questionMapper.selectCards(sectionCode, filter, userId, Pages.offset(p, s), s);
+        List<QuestionCard> items = questionMapper.selectCards(sectionCode, filter, authorId, userId, Pages.offset(p, s), s);
         return new PageResult<>(items, p, s, total);
     }
 
@@ -120,10 +124,13 @@ public class QuestionServiceImpl implements QuestionService {
         AppUser authorEntity = question.getAuthorId() == null ? null : appUserMapper.selectById(question.getAuthorId());
         if (authorEntity != null) {
             author.setId(authorEntity.getId());
+            author.setUsername(authorEntity.getUsername());
             author.setNickname(authorEntity.getNickname());
             author.setAvatarHue(authorEntity.getAvatarHue());
         }
         detail.setAuthor(author);
+        detail.setLikeCount(question.getLikeCount() == null ? 0 : question.getLikeCount());
+        detail.setLikedByMe(userId != null && postLikeMapper.existsLike(userId, "question", id));
 
         List<Answer> answers = answerMapper.selectByQuestion(id);
         Map<Long, AppUser> authors = loadAuthors(answers);
@@ -142,6 +149,7 @@ public class QuestionServiceImpl implements QuestionService {
             AuthorBrief brief = new AuthorBrief();
             if (answerAuthor != null) {
                 brief.setId(answerAuthor.getId());
+                brief.setUsername(answerAuthor.getUsername());
                 brief.setNickname(answerAuthor.getNickname());
                 brief.setAvatarHue(answerAuthor.getAvatarHue());
             }

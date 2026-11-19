@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { ArrowLeft, FileText, HelpCircle, Package } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
+import { spring } from '@/lib/motion'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,7 +12,6 @@ import type { ArticleCard, Page, QuestionCard, ResourceCard } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
 import { ErrorBlock, PageShell, Pager, Segmented } from '@/features/common/ui'
-import { paletteFor } from '@/features/common/sectionTheme'
 import { ArticleCardItem } from '@/features/articles/ArticleCard'
 import { QuestionCardItem } from '@/features/questions/QuestionCard'
 import { ResourceCardItem } from '@/features/resources/ResourceCard'
@@ -24,6 +24,7 @@ const PAGE_SIZE = 8
 export default function SectionPage() {
   const { code = '' } = useParams()
   const location = useLocation()
+  const reduced = useReducedMotion()
   const [tab, setTab] = useState<TabKey>('article')
   const [sort, setSort] = useState<'latest' | 'hot'>('latest')
   const [filter, setFilter] = useState<'all' | 'unsolved' | 'solved'>('all')
@@ -79,13 +80,8 @@ export default function SectionPage() {
             <ErrorBlock className="mt-2" message={section.error} onRetry={section.reload} />
           ) : (
             <>
-              <h1 className="mt-1.5 flex items-center gap-2 text-2xl font-semibold tracking-tight">
+              <h1 className="page-title mt-3">
                 {section.data?.name}
-                {section.data ? (
-                  <span className={cn('rounded-md px-2 py-0.5 text-[11px] font-medium', paletteFor(section.data.accent ?? section.data.code).chip)}>
-                    /{section.data.code}
-                  </span>
-                ) : null}
               </h1>
               <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {section.data?.tagline || section.data?.description}
@@ -110,9 +106,9 @@ export default function SectionPage() {
       </div>
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as TabKey)} className="mt-5">
-        <div className="glass-2 sticky top-0 z-20 -mx-4 border-b border-border/60 bg-background/80 px-4 py-2.5 backdrop-blur-md md:-mx-6 md:px-6">
+        <div className="glass-2 sticky top-16 z-20 -mx-4 border-b px-4 py-2.5 md:-mx-6 md:px-6">
           <div className="flex flex-wrap items-center gap-3">
-            <TabsList className="h-9">
+            <TabsList aria-label="版块内容">
               <TabsTrigger value="article" indicatorId="section-tab">
                 文章
                 <span className="text-[10px] tabular-nums text-muted-foreground">{counts.article}</span>
@@ -151,14 +147,11 @@ export default function SectionPage() {
                   ]}
                 />
               ) : null}
-              {tab === 'resource' ? (
-                <span className="hidden text-xs text-muted-foreground sm:inline">共 {counts.resource} 份资源</span>
-              ) : null}
             </div>
           </div>
         </div>
 
-        <div className="min-h-[560px] pt-4">
+        <motion.div layout={reduced ? false : "size"} transition={spring.gentle} className="min-h-[320px] pt-6">
           {list.loading ? (
             <div className={cn('grid gap-3', tab === 'question' ? 'grid-cols-1' : 'sm:grid-cols-2')}>
               {Array.from({ length: 4 }).map((_, index) => (
@@ -173,49 +166,28 @@ export default function SectionPage() {
             <>
               <TabsContent value="article" className="mt-0">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {((list.data?.items ?? []) as ArticleCard[]).map((article, index) => (
-                    <motion.div
-                      key={article.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03, duration: 0.24 }}
-                    >
-                      <ArticleCardItem article={article} className="h-full" />
-                    </motion.div>
+                  {((list.data?.items ?? []) as ArticleCard[]).map((article) => (
+                    <ArticleCardItem article={article} className="h-full" key={article.id} />
                   ))}
                 </div>
               </TabsContent>
               <TabsContent value="question" className="mt-0">
                 <div className="space-y-3">
-                  {((list.data?.items ?? []) as QuestionCard[]).map((question, index) => (
-                    <motion.div
-                      key={question.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03, duration: 0.24 }}
-                    >
-                      <QuestionCardItem question={question} />
-                    </motion.div>
+                  {((list.data?.items ?? []) as QuestionCard[]).map((question) => (
+                    <QuestionCardItem question={question} key={question.id} />
                   ))}
                 </div>
               </TabsContent>
               <TabsContent value="resource" className="mt-0">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {((list.data?.items ?? []) as ResourceCard[]).map((resource, index) => (
-                    <motion.div
-                      key={resource.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03, duration: 0.24 }}
-                    >
-                      <ResourceCardItem resource={resource} className="h-full" />
-                    </motion.div>
+                  {((list.data?.items ?? []) as ResourceCard[]).map((resource) => (
+                    <ResourceCardItem resource={resource} className="h-full" key={resource.id} />
                   ))}
                 </div>
               </TabsContent>
             </>
           )}
-        </div>
+        </motion.div>
       </Tabs>
 
       <Pager className="mt-6" page={pageNo} totalPages={list.data?.totalPages ?? 1} onChange={setPageNo} />
@@ -229,12 +201,6 @@ function TabEmpty({ tab, filter }: { tab: TabKey; filter: 'all' | 'unsolved' | '
       <EmptyState
         icon={<FileText className="size-5" aria-hidden />}
         title="这个版块还没有文章"
-        description="成为第一个在这里记录学习笔记的人。"
-        action={
-          <Button asChild size="sm">
-            <Link to="/articles/new">写第一篇</Link>
-          </Button>
-        }
       />
     )
   }
@@ -243,12 +209,6 @@ function TabEmpty({ tab, filter }: { tab: TabKey; filter: 'all' | 'unsolved' | '
       <EmptyState
         icon={<HelpCircle className="size-5" aria-hidden />}
         title={filter === 'all' ? '这个版块还没有提问' : filter === 'solved' ? '还没有已解决的问题' : '没有未解决的问题'}
-        description={filter === 'all' ? '有问题可以直接问，提问不消耗积分。' : '换个筛选条件看看。'}
-        action={
-          <Button asChild size="sm">
-            <Link to="/qa/new">我要提问</Link>
-          </Button>
-        }
       />
     )
   }
@@ -256,7 +216,6 @@ function TabEmpty({ tab, filter }: { tab: TabKey; filter: 'all' | 'unsolved' | '
     <EmptyState
       icon={<Package className="size-5" aria-hidden />}
       title="这个版块还没有资源"
-      description="笔记、模板、示例代码都可以分享出来。"
     />
   )
 }

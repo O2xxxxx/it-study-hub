@@ -16,14 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 集成测试基类：连独立的 itstudy_test 库，固定 test profile。
  * 需要回滚的用例自行加 @Transactional（并发用例不能加，否则线程看不到未提交数据）。
  */
-@SpringBootTest(properties = {
-        "spring.datasource.url=jdbc:mysql://127.0.0.1:3307/itstudy_test?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false",
-        "spring.datasource.username=itstudy",
-        "spring.datasource.password=itstudy123",
-        "spring.sql.init.mode=always",
-        "spring.sql.init.encoding=UTF-8",
-        "spring.sql.init.schema-locations=classpath:schema-test.sql"
-})
+@SpringBootTest
 @ActiveProfiles("test")
 public abstract class BaseIntegrationTest {
 

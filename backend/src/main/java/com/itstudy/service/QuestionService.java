@@ -12,7 +12,11 @@ import com.itstudy.dto.QuestionForm;
 
 public interface QuestionService {
 
-    PageResult<QuestionCard> page(String sectionCode, String filter, Integer page, Integer size, Long userId);
+    default PageResult<QuestionCard> page(String sectionCode, String filter, Integer page, Integer size, Long userId) {
+        return pageByAuthor(sectionCode, filter, page, size, userId, null);
+    }
+
+    PageResult<QuestionCard> pageByAuthor(String sectionCode, String filter, Integer page, Integer size, Long userId, Long authorId);
 
     QuestionDetail detail(Long id, Long userId);
 

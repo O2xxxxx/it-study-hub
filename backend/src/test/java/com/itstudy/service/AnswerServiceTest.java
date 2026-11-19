@@ -9,6 +9,7 @@ import com.itstudy.entity.PointLog;
 import com.itstudy.entity.Question;
 import com.itstudy.mapper.AnswerMapper;
 import com.itstudy.mapper.AppUserMapper;
+import com.itstudy.mapper.PostLikeMapper;
 import com.itstudy.mapper.FavoriteMapper;
 import com.itstudy.mapper.PointLogMapper;
 import com.itstudy.mapper.QuestionMapper;
@@ -50,7 +51,7 @@ class AnswerServiceTest {
         PointsProperties points = new PointsProperties();
         points.setArticlePublish(5);
         points.setAnswerCreate(3);
-        questionService = new QuestionServiceImpl(questionMapper, answerMapper, sectionMapper, appUserMapper,
+        questionService = new QuestionServiceImpl(questionMapper, answerMapper, sectionMapper, appUserMapper, org.mockito.Mockito.mock(PostLikeMapper.class),
                 pointLogMapper, favoriteMapper, renderer, points);
     }
 

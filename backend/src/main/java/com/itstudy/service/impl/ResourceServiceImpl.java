@@ -113,7 +113,7 @@ public class ResourceServiceImpl implements ResourceService {
         int latest = balanceAfter == null ? 0 : balanceAfter;
         PointAwarder.recordSpend(pointLogMapper, userId, cost,
                 "兑换资源《" + resource.getTitle() + "》",
-                "resource",
+                "resource_exchange",
                 exchange.getId(),
                 latest);
 

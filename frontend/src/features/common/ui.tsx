@@ -1,4 +1,5 @@
-import type { MouseEvent, ReactNode } from 'react'
+import { useId } from 'react'
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { AlertTriangle, ChevronLeft, ChevronRight, LogIn, RefreshCw } from 'lucide-react'
@@ -95,11 +96,27 @@ export function Segmented<T extends string>({
   layoutId?: string
   className?: string
 }) {
+  const id = useId()
+  function navigateOptions(event: KeyboardEvent<HTMLDivElement>) {
+    const index = options.findIndex(option => option.value === value)
+    const last = options.length - 1
+    const next = event.key === 'ArrowRight' ? (index + 1) % options.length
+      : event.key === 'ArrowLeft' ? (index + last) % options.length
+      : event.key === 'Home' ? 0
+      : event.key === 'End' ? last
+      : null
+    if (next === null || !options[next]) return
+    event.preventDefault()
+    onChange(options[next].value)
+    event.currentTarget.querySelectorAll('button')[next]?.focus()
+  }
+
   return (
     <div
       role="tablist"
+      onKeyDown={navigateOptions}
       className={cn(
-        'inline-flex items-center gap-1 rounded-xl border border-border/70 bg-muted/60 p-1 text-sm text-muted-foreground',
+        'control-rail inline-flex items-center gap-1 text-sm text-muted-foreground',
         className,
       )}
     >
@@ -111,17 +128,19 @@ export function Segmented<T extends string>({
             type="button"
             role="tab"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(option.value)}
             className={cn(
-              'relative rounded-lg px-3 py-1.5 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
+              'control-segment relative isolate px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]',
               active ? 'text-foreground' : 'hover:text-foreground',
             )}
           >
             {active ? (
               <motion.span
-                layoutId={layoutId}
-                className="absolute inset-0 -z-[1] rounded-lg bg-card shadow-sm ring-1 ring-border/70"
-                transition={spring.snappy}
+                layoutId={id + layoutId}
+                data-indicator=""
+          className="absolute inset-0 -z-[1] bg-card shadow-sm ring-1 ring-border/70"
+                transition={spring.gentle}
               />
             ) : null}
             <span className="relative z-[1] whitespace-nowrap">
@@ -274,7 +293,7 @@ export function LoginPrompt({
 }
 
 export function PageShell({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('container py-8 sm:py-10', className)}>{children}</div>
+  return <div className={cn('container py-8 md:py-16', className)}>{children}</div>
 }
 
 export function PageHeading({
@@ -294,8 +313,8 @@ export function PageHeading({
     <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', className)}>
       <div className="space-y-2">
         {eyebrow ? <div className="text-xs font-medium uppercase tracking-wide text-primary">{eyebrow}</div> : null}
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{title}</h1>
-        {description ? <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p> : null}
+        <h1 className="page-title text-foreground">{title}</h1>
+        {description ? <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">{description}</p> : null}
       </div>
       {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>

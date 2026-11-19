@@ -20,6 +20,6 @@ public final class Pages {
     }
 
     public static int offset(int page, int size) {
-        return (page - 1) * size;
+        return (int) Math.min((page - 1L) * size, Integer.MAX_VALUE);
     }
 }

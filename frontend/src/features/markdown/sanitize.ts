@@ -10,7 +10,7 @@ const BLOCKED_TAGS = new Set([
 
 const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data:text\/html|data:image\/svg\+xml)/i
 
-export function sanitizeHtml(html: string): string {
+export function sanitizeHtml(html: string, pageTitle?: string): string {
   if (!html) return ''
   if (typeof window === 'undefined' || typeof window.DOMParser === 'undefined') {
     return html.replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -38,6 +38,11 @@ export function sanitizeHtml(html: string): string {
         node.removeAttribute(attr.name)
       }
     }
+  }
+  const heading = doc.body.firstElementChild
+  if (pageTitle && heading?.tagName === 'H1' &&
+      heading.textContent?.replace(/\s+/g, ' ').trim() === pageTitle.replace(/\s+/g, ' ').trim()) {
+    heading.remove()
   }
   return doc.body.innerHTML
 }

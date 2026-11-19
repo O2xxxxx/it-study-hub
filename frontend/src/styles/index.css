@@ -251,7 +251,7 @@
 /* 滚动后加深的顶栏 */
 .app-header {
   background-color: hsl(var(--glass-tint) / 0.62);
-  transition: background-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+  transition: background-color var(--motion-state) var(--motion-ease),
     box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.28s ease;
 }
@@ -342,7 +342,7 @@
   text-decoration-color: hsl(var(--link) / 0.32);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
-  transition: text-decoration-color 0.18s ease, color 0.18s ease;
+  transition: text-decoration-color var(--motion-state) var(--motion-ease), color var(--motion-state) var(--motion-ease);
 }
 
 .prose-it a:hover {
@@ -584,7 +584,7 @@
   font-weight: 500;
   box-shadow: 0 18px 40px -18px hsl(var(--glass-shadow));
   transform: translateY(-180%);
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--motion-feedback) var(--motion-ease);
 }
 
 .skip-link:focus-visible {
@@ -616,32 +616,120 @@
 }
 
 /* 减少动态效果：只保留透明度与状态色变化，去掉位移与弹簧 */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-property: opacity, color, background-color, border-color, box-shadow, fill, stroke !important;
-    transition-duration: 0.12s !important;
-    scroll-behavior: auto !important;
-  }
+:root {
+  --motion-feedback: 120ms;
+  --motion-state: 180ms;
+  --motion-panel: 240ms;
+  --motion-close: 160ms;
+  --motion-page: 320ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  .app-header,
-  .skip-link {
-    transition-duration: 0.01ms !important;
+.motion-feedback { transition-duration: var(--motion-feedback); }
+
+.control-rail {
+  min-height: 42px;
+  padding: 4px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  corner-shape: squircle;
+  background: hsl(var(--muted) / 0.6);
+}
+
+.control-segment {
+  height: 32px;
+  border-radius: var(--radius-md);
+  corner-shape: squircle;
+  line-height: 1;
+}
+
+.control-segment > [data-indicator] {
+  border-radius: inherit;
+  corner-shape: squircle;
+}
+
+.page-title {
+  font-size: clamp(34px, 4vw, 48px);
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+
+.content-card {
+  border-color: hsl(var(--border));
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04);
+  transition: transform var(--motion-feedback) var(--motion-ease),
+              border-color var(--motion-feedback) var(--motion-ease);
+}
+
+@media (hover: hover) {
+  .content-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.3);
   }
 }
-/* G2 连续曲率圆角（Chrome 139+）：曲率连续，比普通 border-radius 的圆弧过渡更顺滑。
-   浏览器不支持 corner-shape 时自动回退为普通圆角，视觉层级与尺寸完全一致。 */
-@supports (corner-shape: squircle) {
-  *,
-  *::before,
-  *::after {
-    corner-shape: squircle;
+
+.card-cover::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+}
+.card-cover:focus-visible::after {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.motion-panel {
+  --panel-x: 0px;
+  --panel-y: 6px;
+  --panel-scale: 0.97;
+}
+
+.anchored-panel[data-side='bottom'] { --panel-y: -6px; }
+.anchored-panel[data-side='left'] { --panel-x: 6px; --panel-y: 0px; }
+.anchored-panel[data-side='right'] { --panel-x: -6px; --panel-y: 0px; }
+.motion-panel[data-motion-edge='left'] { --panel-x: -6px; --panel-y: 0px; }
+.motion-panel[data-motion-edge='right'] { --panel-x: 6px; --panel-y: 0px; }
+.motion-panel[data-motion-edge='top'] { --panel-y: -6px; }
+
+.motion-panel:is([data-state='open'], [data-state='instant-open'], [data-state='delayed-open']) {
+  animation: panel-enter var(--motion-panel) var(--motion-ease) both;
+}
+
+.motion-panel[data-state='closed'] {
+  animation: panel-leave var(--motion-close) var(--motion-ease) both;
+  pointer-events: none;
+}
+
+.motion-overlay[data-state='open'] {
+  animation: overlay-enter var(--motion-state) var(--motion-ease) both;
+}
+
+.motion-overlay[data-state='closed'] {
+  animation: overlay-leave var(--motion-close) var(--motion-ease) both;
+  pointer-events: none;
+}
+
+@keyframes panel-enter {
+  from { opacity: 0; translate: var(--panel-x) var(--panel-y); scale: var(--panel-scale); }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+@keyframes panel-leave {
+  from { opacity: 1; translate: 0 0; scale: 1; }
+  to { opacity: 0; translate: var(--panel-x) var(--panel-y); scale: var(--panel-scale); }
+}
+@keyframes overlay-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-leave { from { opacity: 1; } to { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .motion-panel, .motion-panel[data-side], .motion-panel[data-motion-edge] {
+    --panel-x: 0px;
+    --panel-y: 0px;
+    --panel-scale: 1;
   }
+  .content-card:hover, [class*='active:scale']:active { transform: none; }
+  .animate-pulse, .animate-spin { animation: none; }
 }

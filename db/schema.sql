@@ -12,6 +12,8 @@ USE itstudy;
 -- ------------------------------------------------------------
 CREATE TABLE app_user (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  follower_count  INT UNSIGNED    NOT NULL DEFAULT 0,
+  following_count INT UNSIGNED    NOT NULL DEFAULT 0,
   username      VARCHAR(32)     NOT NULL COMMENT '登录名，唯一',
   password_hash VARCHAR(100)    NOT NULL COMMENT 'BCrypt 散列，绝不存明文',
   nickname      VARCHAR(32)     NOT NULL COMMENT '展示昵称',
@@ -45,6 +47,7 @@ CREATE TABLE section (
 -- ------------------------------------------------------------
 CREATE TABLE article (
   id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  like_count      INT UNSIGNED    NOT NULL DEFAULT 0,
   section_id     BIGINT UNSIGNED NOT NULL,
   author_id      BIGINT UNSIGNED NOT NULL,
   title          VARCHAR(120)    NOT NULL,
@@ -66,6 +69,7 @@ CREATE TABLE article (
 -- ------------------------------------------------------------
 CREATE TABLE question (
   id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  like_count      INT UNSIGNED    NOT NULL DEFAULT 0,
   section_id         BIGINT UNSIGNED NOT NULL,
   author_id          BIGINT UNSIGNED NOT NULL,
   title              VARCHAR(160)    NOT NULL,
@@ -186,3 +190,29 @@ CREATE TABLE draft (
   UNIQUE KEY uk_draft_slot (user_id, draft_type, draft_key),
   CONSTRAINT fk_draft_user FOREIGN KEY (user_id) REFERENCES app_user (id)
 ) ENGINE=InnoDB COMMENT='按账号与编辑对象隔离的草稿';
+
+-- 点赞目标由业务事务验证和清理。
+CREATE TABLE IF NOT EXISTS post_like (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id     BIGINT UNSIGNED NOT NULL,
+  target_type VARCHAR(16)     NOT NULL,
+  target_id   BIGINT UNSIGNED NOT NULL,
+  created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_like_target (user_id, target_type, target_id),
+  KEY idx_like_post (target_type, target_id),
+  CONSTRAINT ck_like_type CHECK (target_type IN ('article', 'question'))
+) ENGINE=InnoDB;
+
+-- 保留历史关注。列表用 LEFT JOIN 显示已经注销的账号。
+CREATE TABLE IF NOT EXISTS user_follow (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  follower_id BIGINT UNSIGNED NOT NULL,
+  followee_id BIGINT UNSIGNED NOT NULL,
+  created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_follow_pair (follower_id, followee_id),
+  KEY idx_followee (followee_id, id),
+  KEY idx_follower (follower_id, id),
+  CONSTRAINT ck_follow_distinct CHECK (follower_id <> followee_id)
+) ENGINE=InnoDB;

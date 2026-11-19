@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 interface SearchContextValue {
@@ -6,7 +6,7 @@ interface SearchContextValue {
   initialQuery: string
   open: (query?: string) => void
   close: () => void
-  toggle: () => void
+  restoreFocus: () => void
 }
 
 const SearchContext = createContext<SearchContextValue | null>(null)
@@ -14,17 +14,21 @@ const SearchContext = createContext<SearchContextValue | null>(null)
 export function SearchProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [initialQuery, setInitialQuery] = useState('')
+  const trigger = useRef<HTMLElement | null>(null)
 
   const open = useCallback((query?: string) => {
+    trigger.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     setInitialQuery(query ?? '')
     setIsOpen(true)
   }, [])
   const close = useCallback(() => setIsOpen(false), [])
-  const toggle = useCallback(() => setIsOpen((value) => !value), [])
+  const restoreFocus = useCallback(() => {
+    if (trigger.current?.isConnected) trigger.current.focus({ preventScroll: true })
+  }, [])
 
   const value = useMemo<SearchContextValue>(
-    () => ({ isOpen, initialQuery, open, close, toggle }),
-    [isOpen, initialQuery, open, close, toggle],
+    () => ({ isOpen, initialQuery, open, close, restoreFocus }),
+    [isOpen, initialQuery, open, close, restoreFocus],
   )
 
   return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>

@@ -101,6 +101,7 @@ flowchart LR
     U --> M5["资源"]
     U --> M6["积分中心"]
     U --> M7["搜索与收藏"]
+    U --> M8["用户主页与社交"]
 
     M1 --> M1a["注册（用户名唯一 / BCrypt）"]
     M1 --> M1b["登录 · 退出 · 会话"]
@@ -129,13 +130,17 @@ flowchart LR
 
     M7 --> M7a["Ctrl/⌘+K 全站搜索"]
     M7 --> M7b["收藏与个人中心回看"]
+
+    M8 --> M8a["公开主页与编辑昵称"]
+    M8 --> M8b["点赞与取消点赞"]
+    M8 --> M8c["关注和粉丝列表"]
 ```
 
 ---
 
 ## 三、数据库表结构
 
-共 9 张表，全部使用 InnoDB 与 utf8mb4，外键约束 + 唯一约束 + CHECK 约束共同保证数据一致性。
+共 12 张表，使用 InnoDB。社交关系通过组合唯一索引控制重复写入，冗余计数和明细在同一事务内更新。
 
 | 表名 | 作用 | 关键约束 |
 | --- | --- | --- |
@@ -147,7 +152,10 @@ flowchart LR
 | resource | 可兑换资料 | ck_resource_points 所需积分必须大于 0 |
 | resource_exchange | 兑换记录 | uk_exchange_user_resource(user_id, resource_id) 一人一资源一条 |
 | point_log | 积分流水 | uk_point_log_business(user_id, reason_type, ref_id) 同业务不重复记账 |
-| favorite / draft | 收藏、草稿 | 收藏三者唯一；草稿按 (user_id, draft_type, draft_key) 唯一 |
+| favorite | 收藏 | 会员、目标类型与目标 ID 唯一 |
+| draft | 草稿 | (user_id, draft_type, draft_key) 唯一 |
+| post_like | 文章与问答点赞 | uk_like_target(user_id, target_type, target_id)，目标类型 CHECK |
+| user_follow | 用户关注 | uk_follow_pair(follower_id, followee_id)，禁止自关注 |
 
 ### 3.1 字段明细（节选核心表）
 
@@ -160,6 +168,7 @@ flowchart LR
 | password_hash | VARCHAR(100) NOT NULL | BCrypt 散列，从不存明文 |
 | nickname | VARCHAR(32) NOT NULL | 展示昵称 |
 | points | INT NOT NULL DEFAULT 0 | 当前积分余额 |
+| follower_count / following_count | INT UNSIGNED DEFAULT 0 | 粉丝及关注计数 |
 
 **article**
 
@@ -169,6 +178,15 @@ flowchart LR
 | author_id | BIGINT UNSIGNED | 作者，编辑权限依据 |
 | content_md | MEDIUMTEXT | Markdown 原文 |
 | reward_granted | TINYINT(1) | 1 表示首次发布奖励已发放，编辑不会再加分 |
+
+文章和问题的 like_count 均为 INT UNSIGNED NOT NULL DEFAULT 0。
+
+| 社交表 | 字段 | 说明 |
+| --- | --- | --- |
+| post_like | id, user_id, target_type, target_id, created_at | BIGINT 主键和关系 ID，类型为 article 或 question，时间为 DATETIME |
+| user_follow | id, follower_id, followee_id, created_at | BIGINT 主键和关系 ID，时间为 DATETIME |
+
+关注明细保留历史用户 ID。另一端用户已注销时，目录显示「已注销用户」并保留该条关系。点赞目标在服务事务中校验。删除文章时同步清理文章点赞。
 
 **answer**
 
@@ -199,6 +217,12 @@ erDiagram
     APP_USER ||--o{ RESOURCE_EXCHANGE : "兑换"
     APP_USER ||--o{ FAVORITE : "收藏"
     APP_USER ||--o{ DRAFT : "草稿"
+    APP_USER ||..o{ POST_LIKE : "点赞者"
+    ARTICLE o|..o{ POST_LIKE : "article 目标"
+    QUESTION o|..o{ POST_LIKE : "question 目标"
+    APP_USER ||..o{ USER_FOLLOW : "关注方"
+    APP_USER ||..o{ USER_FOLLOW : "被关注方"
+
 
     SECTION ||--o{ ARTICLE : "归属"
     SECTION ||--o{ QUESTION : "归属"
@@ -214,6 +238,8 @@ erDiagram
         varchar username UK
         varchar password_hash
         int points
+        int follower_count
+        int following_count
     }
     ARTICLE {
         bigint id PK
@@ -222,12 +248,14 @@ erDiagram
         varchar title
         text content_md
         tinyint reward_granted
+        int like_count
     }
     QUESTION {
         bigint id PK
         bigint author_id FK
         bigint accepted_answer_id
         tinyint solved
+        int like_count
     }
     ANSWER {
         bigint id PK
@@ -247,6 +275,19 @@ erDiagram
         bigint resource_id FK
         int points_cost
     }
+    POST_LIKE {
+        bigint id PK
+        bigint user_id
+        varchar target_type
+        bigint target_id
+        datetime created_at
+    }
+    USER_FOLLOW {
+        bigint id PK
+        bigint follower_id
+        bigint followee_id
+        datetime created_at
+    }
     POINT_LOG {
         bigint id PK
         bigint user_id FK
@@ -259,7 +300,7 @@ erDiagram
 
 ## 四、运行截图与说明
 
-以下截图全部来自本机真实运行的前后端（后端 8080、前端 5173、MySQL 3307），按 `db/reset-db.sh` 的种子数据演示，采集脚本见 `scripts/shoot.mjs`。
+截图来自实际运行的前后端和 MySQL，采集脚本见 `scripts/shoot.mjs`。第 1–2 张和第 17–20 张来自本次优化后的隔离验证环境，第 3–16 张保留原业务演示。
 
 界面统一使用一套 G2 圆角 token：8 / 12 / 16 / 20 / 999px，定义在 `frontend/src/styles/index.css` 的 `--radius-*` 变量里，`tailwind.config.ts` 把 `rounded-xs/sm/md/lg/xl/2xl/full` 全部映射到这些变量，业务代码不再写任意像素圆角。所有带圆角的元素都启用 `corner-shape: squircle`（连续曲率，Chrome 139+），不支持该属性时自动回退成普通圆角，尺寸与层级不变。
 
@@ -358,6 +399,30 @@ erDiagram
 ![积分不足](screenshots/16-insufficient-points.png)
 
 0 分账号点击兑换，后端返回 `400 POINTS_NOT_ENOUGH`，页面同时给出差额与赚分路径（写文章 +5、回答问题 +3）。
+
+### 17. 本人主页（桌面端）
+
+![本人主页](screenshots/17-profile-own.png)
+
+本人可编辑昵称，查看积分摘要、内容、收藏和草稿。
+
+### 18. 他人主页与关注入口
+
+![他人主页](screenshots/18-profile-follow.png)
+
+公开展示文章、回答、粉丝和关注数量，会员可以从此处关注作者。
+
+### 19. 手机端用户主页（390 × 844）
+
+![手机端用户主页](screenshots/19-profile-mobile.png)
+
+暗色外观保留头像、关注按钮和底部五项导航。
+
+### 20. 文章点赞态
+
+![文章点赞态](screenshots/20-article-liked.png)
+
+从文章作者进入主页。已点赞的心形呈蓝色实心，按钮和数量与列表同步。
 
 ## 五、关键代码与说明
 
@@ -478,15 +543,15 @@ public ExchangeResult exchange(Long id, Long userId) {
 
 | 项目 | 命令 | 结果 |
 | --- | --- | --- |
-| 后端集成/单元测试 | `bash scripts/mvn.sh -f backend/pom.xml test` | 10 个测试类、28 项用例，`Failures: 0, Errors: 0` |
-| 后端接口验收 | `bash scripts/acceptance.sh` | PASS 37 / FAIL 0 |
+| 后端集成/单元测试 | `bash scripts/mvn.sh -f backend/pom.xml test` | 13 个测试类、37 项用例，`Failures: 0, Errors: 0` |
+| 后端接口验收 | `bash scripts/acceptance.sh` | PASS 53 / FAIL 0 |
 | 前端类型检查与构建 | `cd frontend && npx tsc --noEmit && npx vite build` | 均 exit 0 |
-| 浏览器端到端 | `cd frontend && node scripts/e2e-ui.mjs` | 31 项断言全部通过 |
+| 浏览器端到端 | `cd frontend && node scripts/e2e-ui.mjs` | 47 项断言全部通过 |
 
-浏览器端到端覆盖了验收剧本的完整链路：注册 0 分 → 兑换被拒 → 发文 +5 → 答题 +3 → 兑换扣 5 → 下载 → 重复兑换/重复下载不扣分 → 未兑换下载 403 → 收藏跨刷新 → Ctrl+K 键盘搜索 → 草稿恢复 → 采纳 → 移动端兑换下载。
+浏览器端到端覆盖了验收剧本的完整链路：注册 0 分 → 兑换被拒 → 发文 +5 → 答题 +3 → 兑换扣 5 → 下载 → 重复兑换/重复下载不扣分 → 未兑换下载 403 → 收藏跨刷新 → Ctrl+K 键盘搜索 → 草稿恢复 → 采纳 → 移动端兑换下载。新增场景覆盖关注与点赞跨刷新、取消点赞失败回滚、移动端主页及导航对齐、搜索和下载焦点。
 
 ## 七、答辩要点
 
 1. **积分一致性怎么保证**：三个计分点各自是一个 `@Transactional` 方法；加分走「查重 → 写流水（唯一约束兜底）→ 更新余额」，扣分走「先插兑换记录（唯一约束抢锁）→ 条件更新扣余额」，任何一步失败整体回滚。
-2. **并发与重复提交怎么防**：唯一索引是最终防线（`uk_answer_question_author`、`uk_exchange_user_resource`、`uk_point_log_reason`），代码里的存在性检查只负责给出友好提示；扣分用 `WHERE points >= ?` 的条件更新，余额不可能为负。
+2. **并发与重复提交怎么防**：唯一索引是最终防线（`uk_answer_question_author`、`uk_exchange_user_resource`、`uk_point_log_business`），代码里的存在性检查只负责给出友好提示；扣分用 `WHERE points >= ?` 的条件更新，余额不可能为负。
 3. **权限边界怎么划**：登录态存 HttpSession，`AuthInterceptor` 统一拦截写接口；内容修改按 `authorId` 比对，采纳按 `question.authorId` 比对，下载按兑换记录判定，前端隐藏按钮只是体验，后端才是判定点。

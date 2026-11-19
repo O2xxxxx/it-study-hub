@@ -29,9 +29,9 @@ async function copyText(text: string) {
 /**
  * 渲染后端清洗后的 HTML，并给代码块补上高亮与「复制」按钮。
  */
-export function MarkdownView({ html, className }: { html: string; className?: string }) {
+export function MarkdownView({ html, className, pageTitle }: { html: string; className?: string; pageTitle?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const safeHtml = useMemo(() => sanitizeHtml(html || ''), [html])
+  const safeHtml = useMemo(() => sanitizeHtml(html || '', pageTitle), [html, pageTitle])
 
   useEffect(() => {
     const root = containerRef.current

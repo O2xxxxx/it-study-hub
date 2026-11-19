@@ -23,4 +23,19 @@ public interface AppUserMapper extends BaseMapper<AppUser> {
 
     @Select("SELECT * FROM app_user WHERE username = #{username}")
     AppUser selectByUsername(@Param("username") String username);
+
+    @Select("SELECT * FROM app_user WHERE id = #{id} FOR UPDATE")
+    AppUser lockUser(@Param("id") Long id);
+
+    @Update("UPDATE app_user SET follower_count = GREATEST(CAST(follower_count AS SIGNED) + #{delta}, 0) WHERE id = #{id}")
+    int adjustFollowers(@Param("id") Long id, @Param("delta") int delta);
+
+    @Update("UPDATE app_user SET following_count = GREATEST(CAST(following_count AS SIGNED) + #{delta}, 0) WHERE id = #{id}")
+    int adjustFollowing(@Param("id") Long id, @Param("delta") int delta);
+
+    @Update("UPDATE app_user SET nickname = #{nickname}, updated_at = NOW() WHERE id = #{id}")
+    int rename(@Param("id") Long id, @Param("nickname") String nickname);
+
+    @Select("SELECT COUNT(*) FROM answer WHERE author_id = #{id}")
+    long countAnswers(@Param("id") Long id);
 }

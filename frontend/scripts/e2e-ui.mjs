@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core'
 
-const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-const BASE = 'http://127.0.0.1:5173'
+const CHROME = process.env.ITSTUDY_CHROME ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+const BASE = process.env.ITSTUDY_WEB_ORIGIN ?? 'http://127.0.0.1:5173'
 const FENCE = String.fromCharCode(96).repeat(3)
 const results = []
 const failures = []
@@ -48,9 +48,6 @@ try {
   await page.fill('#confirm', pwd)
   await page.locator('button[type=submit]').first().click()
   await page.waitForURL((u) => !u.pathname.startsWith('/register'), { timeout: 12000 })
-  console.log('DBG url=' + page.url() + ' cookie=' + JSON.stringify(await page.context().cookies()) + ' header=' + (await page.locator('header').innerText()).replace(/\n+/g, '|').slice(0,80))
-  const meRaw = await page.evaluate(async () => { const r = await fetch('/api/auth/me', { credentials: 'include' }); return { s: r.status, t: (await r.text()).slice(0, 200) } })
-  console.log('DBG me=' + JSON.stringify(meRaw))
   const m0 = await me()
   check('注册后自动登录且积分为 0', m0 && m0.points === 0, JSON.stringify(m0 && { user: m0.username, points: m0.points }))
 
@@ -109,6 +106,8 @@ try {
   const m6 = await me()
   check('兑换成功后余额 8 → 3', m6.points === 3, 'points=' + m6.points)
   check('兑换后页面出现已兑换与下载入口', /已兑换/.test(ownedText) && /下载文件/.test(ownedText), '')
+  const download = page.getByRole('link', { name: '下载文件' })
+  check('兑换后焦点移到下载按钮', await download.evaluate(el => document.activeElement === el))
 
   const dup = await apiJSON('/api/resources/1/exchange', { method: 'POST', body: '{}' })
   const m7 = await me()
@@ -145,6 +144,20 @@ try {
   check('个人中心收藏接口包含该文章', /article/.test(favText) && favText.indexOf(String(articleId)) >= 0, 'status=' + fav.status)
 
   await page.goto(BASE + '/', { waitUntil: 'networkidle' })
+  const alignment = await page.evaluate(() => {
+    const nav = document.querySelector('nav[aria-label="主导航"]').getBoundingClientRect()
+    const group = document.querySelector('section[aria-label="技术版块"]').getBoundingClientRect()
+    const footer = document.querySelector('footer > div').getBoundingClientRect()
+    return Math.abs(nav.left + nav.width / 2 - innerWidth / 2) < 1 && Math.abs(group.left - footer.left) < 1
+  })
+  check('桌面导航居中且页脚与卡片共用左边线', alignment)
+  const searchTrigger = page.locator('#home-search')
+  await searchTrigger.click()
+  const searchPanel = page.getByRole('dialog', { name: '全站搜索' })
+  await searchPanel.waitFor()
+  await page.keyboard.press('Escape')
+  await searchPanel.waitFor({ state: 'hidden' })
+  check('搜索关闭后焦点回到首页搜索入口', await searchTrigger.evaluate(el => document.activeElement === el))
   await page.keyboard.press('Control+k')
   await page.waitForSelector('[role=dialog]', { timeout: 5000 })
   await page.keyboard.type('MyBatis', { delay: 30 })
@@ -167,7 +180,7 @@ try {
     const login = await apiJSON('/api/auth/login', { method: 'POST', body: JSON.stringify({ username: 'alice', password: 'alice1234' }) })
     check('切换 alice 登录用于回答', login.status === 200, 'status=' + login.status)
     const ans = await apiJSON('/api/questions/' + qid + '/answers', { method: 'POST', body: JSON.stringify({ contentMd: '先看 if 的 test 是不是用了 and 连接却没写 where 标签；再看参数名与 @Param 是否一致，最后打开 MyBatis 的 SQL 日志确认拼出来的语句。' }) })
-    check('alice 提交回答并加分', ans.status < 300, 'status=' + ans.status + ' body=' + JSON.stringify(ans.body).slice(0, 100))
+    check('alice 提交回答并加分', ans.status === 201 && ans.body?.pointsDelta === 3, 'status=' + ans.status + ' body=' + JSON.stringify(ans.body).slice(0, 100))
     check('回答奖励 +3 及时到账', ans.body && ans.body.pointsDelta === 3, 'delta=' + (ans.body && ans.body.pointsDelta))
     const answerId = ans.body && (ans.body.answerId || ans.body.id)
     await apiJSON('/api/auth/logout', { method: 'POST' })
@@ -181,13 +194,95 @@ try {
     check('详情页展示已解决与采纳', /已解决/.test(qText) && /采纳/.test(qText), '')
   }
 
+  const person = (await apiJSON('/api/users/teacher')).body
+  await page.goto(BASE + '/articles/1', { waitUntil: 'networkidle' })
+  await page.getByRole('link', { name: person.nickname, exact: true }).click()
+  await page.waitForURL(/\/u\/teacher$/)
+  const profile = page.getByRole('region', { name: '用户资料' })
+  await profile.getByRole('button', { name: '关注', exact: true }).click()
+  await profile.getByRole('button', { name: '取消关注', exact: true }).waitFor()
+  const afterFollow = (await apiJSON('/api/users/teacher')).body
+  check('作者链接打开主页并关注后粉丝 +1', afterFollow.followerCount === person.followerCount + 1 && afterFollow.followedByMe, 'fans=' + afterFollow.followerCount)
+
+  await page.reload({ waitUntil: 'networkidle' })
+  await profile.getByRole('button', { name: '取消关注', exact: true }).waitFor()
+  check('刷新后仍关注', await profile.getByRole('button', { name: '取消关注', exact: true }).getAttribute('aria-pressed') === 'true')
+  const fans = profile.getByRole('button', { name: /^粉丝 / })
+  await fans.click()
+  const sheet = page.getByRole('dialog', { name: '粉丝' })
+  await sheet.getByRole('link', { name: /E2E 验证员/ }).waitFor()
+  await page.keyboard.press('Escape')
+  await sheet.waitFor({ state: 'hidden' })
+  check('粉丝抽屉展示新关系并还原焦点', await fans.evaluate(el => document.activeElement === el))
+
+  await page.goto(BASE + '/articles/1', { waitUntil: 'networkidle' })
+  const beforeLike = (await apiJSON('/api/articles/1')).body.likeCount
+  await page.getByRole('button', { name: '点赞', exact: true }).click()
+  await page.getByRole('button', { name: '取消点赞', exact: true }).waitFor()
+  await page.waitForFunction(async () => (await (await fetch('/api/articles/1')).json()).likedByMe)
+  await page.reload({ waitUntil: 'networkidle' })
+  const currentLike = page.getByRole('button', { name: '取消点赞', exact: true })
+  await currentLike.waitFor()
+  check('文章点赞刷新保留且计数 +1', Number(await currentLike.innerText()) === beforeLike + 1)
+  await currentLike.click()
+  await page.waitForFunction(async () => !(await (await fetch('/api/articles/1')).json()).likedByMe)
+  check('取消点赞还原计数', Number(await page.getByRole('button', { name: '点赞', exact: true }).innerText()) === beforeLike)
+
+  await page.getByRole('button', { name: '点赞', exact: true }).click()
+  await page.waitForFunction(async () => (await (await fetch('/api/articles/1')).json()).likedByMe)
+  let allowFailure
+  const failureGate = new Promise(resolve => { allowFailure = resolve })
+  const routed = '**/api/likes/toggle'
+  await page.route(routed, async route => {
+    await failureGate
+    await route.fulfill({ status: 500, json: { code: 'INTERNAL_ERROR', message: '点赞更新失败' } })
+  }, { times: 1 })
+  await currentLike.click()
+  check('取消点赞先乐观更新', await page.getByRole('button', { name: '点赞', exact: true }).getAttribute('aria-pressed') === 'false')
+  allowFailure()
+  await currentLike.waitFor()
+  check('取消点赞失败时心形和计数回滚', await currentLike.getAttribute('aria-pressed') === 'true' && Number(await currentLike.innerText()) === beforeLike + 1)
+
+  await page.getByRole('link', { name: person.nickname, exact: true }).click()
+  await page.waitForURL(/\/u\/teacher$/)
+  const articleLink = page.locator('a[href="/articles/1"].card-cover')
+  await articleLink.waitFor()
+  const sameCardLike = articleLink.locator('..').getByRole('button', { name: '取消点赞', exact: true })
+  check('列表和文章详情共享点赞状态', await sameCardLike.getAttribute('aria-pressed') === 'true')
+  await page.goto(BASE + '/me', { waitUntil: 'networkidle' })
+  await page.getByRole('button', { name: '编辑资料' }).click()
+  await page.getByRole('textbox', { name: '昵称' }).fill('E2E 资料已更新')
+  await page.getByRole('button', { name: '保存', exact: true }).click()
+  await page.getByRole('heading', { name: 'E2E 资料已更新' }).waitFor()
+  check('本人主页编辑资料', (await me()).nickname === 'E2E 资料已更新')
+
   const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, acceptDownloads: true, locale: 'zh-CN' })
   const mp = await mctx.newPage()
   await mp.goto(BASE + '/login', { waitUntil: 'networkidle' })
-  await mp.fill('#username', 'alice')
-  await mp.fill('#password', 'alice1234')
+  const mobileUser = user + 'm'
+  const createMobile = await mctx.request.post(BASE + '/api/auth/register', {
+    data: { username: mobileUser, nickname: '移动验收用户', password: pwd },
+  })
+  check('手机端验收使用独立账号', createMobile.status() === 201)
+  await mctx.request.post(BASE + '/api/articles', {
+    data: { title: '移动端验收积分准备', sectionId: 1, contentMd: '使用独立账号演示手机端资源兑换与下载。' },
+  })
+  await mp.fill('#username', mobileUser)
+  await mp.fill('#password', pwd)
   await mp.locator('button[type=submit]').first().click()
-  await mp.waitForTimeout(1800)
+  await mp.waitForURL(u => !u.pathname.startsWith('/login'))
+  await mp.goto(BASE + '/u/bob', { waitUntil: 'networkidle' })
+  const mobileProfile = mp.getByRole('region', { name: '用户资料' })
+  await mobileProfile.getByRole('button', { name: '关注', exact: true }).click()
+  await mobileProfile.getByRole('button', { name: '取消关注', exact: true }).waitFor()
+  const mobileFit = await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+  check('390×844 手机端主页可关注且没有横向溢出', mobileFit)
+  const radius = await mp.locator('.control-rail').first().evaluate(rail => {
+    const buttons = [...rail.querySelectorAll('button')]
+    return parseFloat(getComputedStyle(rail).borderRadius) - parseFloat(getComputedStyle(buttons[0]).borderRadius) === 4
+      && buttons.every(button => button.getBoundingClientRect().top === buttons[0].getBoundingClientRect().top)
+  })
+  check('手机端标签圆角按内外间距衔接且按钮同一基线', radius)
   await mp.goto(BASE + '/resources/2', { waitUntil: 'networkidle' })
   const mtext = await mp.locator('body').innerText()
   check('手机端已登录并看到兑换入口', /兑换资料/.test(mtext), mtext.slice(0, 60).replace(/\n/g, ' '))
@@ -206,7 +301,8 @@ try {
 } catch (error) {
   check('脚本执行未抛异常', false, String(error && error.stack ? error.stack.split('\n').slice(0, 4).join(' | ') : error))
 } finally {
-  if (errors.length) console.log('PAGE_ERRORS ' + JSON.stringify(errors.slice(0, 5)))
+  check('浏览器没有未捕获异常', errors.length === 0, errors.slice(0, 5).join(' | '))
   console.log('SUMMARY ' + JSON.stringify({ total: results.length, failed: failures.length, failures, user, articleId }))
   await browser.close()
+  process.exitCode = failures.length > 0 ? 1 : 0
 }

@@ -1,5 +1,5 @@
 {
-  "outDir": "E:/JavaEE lastwork/docs/screenshots",
+  "outDir": "docs/screenshots",
   "shots": [
     {
       "name": "01-home-desktop",
@@ -7,13 +7,15 @@
       "w": 1440,
       "h": 960,
       "fullPage": true,
-      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()"
+      "init": "(() => { localStorage.setItem('itstudy-theme','light'); return 'light'; })()",
+      "expectSelector": "main a[href=\"/s/java\"]"
     },
     {
       "name": "02-sections-desktop",
       "url": "/sections",
       "w": 1440,
-      "h": 960
+      "h": 960,
+      "expectSelector": "main a[href=\"/s/java\"]"
     },
     {
       "name": "03-article-desktop",
@@ -162,6 +164,56 @@
           "wait": 1800
         }
       ]
+    },
+    {
+      "name": "17-profile-own",
+      "url": "/me",
+      "w": 1440,
+      "h": 960,
+      "user": "teacher",
+      "password": "teach1234",
+      "expectSelector": "#main-content [aria-label=\"用户资料\"] h1"
+    },
+    {
+      "name": "18-profile-follow",
+      "url": "/u/teacher",
+      "w": 1440,
+      "h": 960,
+      "user": "demo",
+      "password": "demo1234",
+      "expectSelector": "#main-content button[aria-pressed=\"false\"]"
+    },
+    {
+      "name": "19-profile-mobile",
+      "url": "/u/alice",
+      "w": 390,
+      "h": 844,
+      "mobile": true,
+      "theme": "dark",
+      "user": "bob",
+      "password": "bob12345",
+      "expectSelector": "#main-content [aria-label=\"用户资料\"] h1",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "20-article-liked",
+      "url": "/articles/1",
+      "w": 1440,
+      "h": 960,
+      "user": "alice",
+      "password": "alice1234",
+      "expectSelector": "button[aria-label=\"取消点赞\"][aria-pressed=\"true\"]",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 960
+      }
     }
   ]
 }

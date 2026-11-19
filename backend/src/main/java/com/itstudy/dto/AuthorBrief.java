@@ -6,6 +6,7 @@ import lombok.Data;
 public class AuthorBrief {
 
     private Long id;
+    private String username;
     private String nickname;
     private Integer avatarHue;
 }

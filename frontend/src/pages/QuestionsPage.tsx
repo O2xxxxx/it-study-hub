@@ -127,12 +127,9 @@ export default function QuestionsPage() {
           />
         ) : (
           <div className="space-y-3">
-            {items.map((question, index) => (
+            {items.map((question) => (
               <motion.div
                 key={question.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(index, 6) * 0.03, duration: 0.24 }}
               >
                 <QuestionCardItem question={question} />
               </motion.div>

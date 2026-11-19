@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { animate } from 'motion/react'
-import { DURATION, EASE } from '@/lib/motion'
+import { animate, useReducedMotion } from 'motion/react'
+import { duration as motionDuration, ease } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 /**
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 export function AnimatedNumber({
   value,
   className,
-  duration = DURATION.slower,
+  duration = motionDuration.panel,
   format,
 }: {
   value: number
@@ -19,20 +19,24 @@ export function AnimatedNumber({
 }) {
   const [display, setDisplay] = useState(value)
   const previous = useRef(value)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (previous.current === value) {
+    if (reduced || previous.current === value) {
+      previous.current = value
       setDisplay(value)
       return
     }
     const controls = animate(previous.current, value, {
       duration,
-      ease: EASE.out as unknown as [number, number, number, number],
-      onUpdate: (latest: number) => setDisplay(Math.round(latest)),
+      ease,
+      onUpdate: (latest: number) => {
+        previous.current = latest
+        setDisplay(Math.round(latest))
+      },
     })
-    previous.current = value
     return () => controls.stop()
-  }, [value, duration])
+  }, [value, duration, reduced])
 
   return <span className={cn('tabular-nums', className)}>{format ? format(display) : display}</span>
 }

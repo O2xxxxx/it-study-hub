@@ -31,7 +31,7 @@ const HINTS = ['索引', 'Spring', 'React', 'SQL', 'JVM']
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
 export function SearchDialog() {
-  const { isOpen, initialQuery, open, close } = useSearchController()
+  const { isOpen, initialQuery, open, close, restoreFocus } = useSearchController()
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
@@ -140,21 +140,6 @@ export function SearchDialog() {
     return () => window.removeEventListener('keydown', handler)
   }, [isOpen, open, close])
 
-  // 打开时锁滚动；关闭时还原滚动位置并把焦点还给触发按钮
-  useEffect(() => {
-    if (!isOpen) return
-    const savedY = window.scrollY
-    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    document.documentElement.classList.add('overflow-hidden')
-    return () => {
-      document.documentElement.classList.remove('overflow-hidden')
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: savedY, behavior: 'auto' })
-        trigger?.focus({ preventScroll: true })
-      })
-    }
-  }, [isOpen])
-
   // 键盘选中的条目滚动到可视区域
   useEffect(() => {
     const container = listRef.current
@@ -192,6 +177,10 @@ export function SearchDialog() {
     <Dialog open={isOpen} onOpenChange={(open) => (open ? undefined : close())}>
       <DialogContent
         hideClose
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          restoreFocus()
+        }}
         onOpenAutoFocus={(event) => {
           event.preventDefault()
           inputRef.current?.focus()

@@ -1,7 +1,7 @@
 import type {
   ArticleCard, ArticleDetail, AuthState, Draft, ExchangeRecord, ExchangeResult, FavoriteGroups,
   MutationResult, Page, PointsOverview, PointLog, QuestionCard, QuestionDetail, ResourceCard,
-  SearchResponse, Section, User,
+  SearchResponse, Section, User, UserProfile, UserBrief, FollowResult, LikeResult, PostType,
 } from './types'
 
 export class ApiError extends Error {
@@ -101,6 +101,20 @@ export const api = {
   favorites: (type?: string) => api.get<FavoriteGroups>('/api/favorites', { type }),
   toggleFavorite: (targetType: string, targetId: number) =>
     api.post<{ favorited: boolean; count: number }>('/api/favorites/toggle', { targetType, targetId }),
+
+  userProfile: (username: string) => api.get<UserProfile>('/api/users/' + encodeURIComponent(username)),
+  userArticles: (username: string, page: number) =>
+    api.get<Page<ArticleCard>>('/api/users/' + encodeURIComponent(username) + '/articles', { page, size: 9 }),
+  userQuestions: (username: string, page: number) =>
+    api.get<Page<QuestionCard>>('/api/users/' + encodeURIComponent(username) + '/questions', { page, size: 9 }),
+  userConnections: (username: string, kind: 'followers' | 'following', page: number) =>
+    api.get<Page<UserBrief>>('/api/users/' + encodeURIComponent(username) + '/' + kind, { page, size: 12 }),
+  followUser: (username: string, following: boolean) =>
+    api.post<FollowResult>('/api/users/' + encodeURIComponent(username) + (following ? '/follow' : '/unfollow')),
+  renameProfile: (nickname: string) =>
+    request<User>('/api/users/me', { method: 'PATCH', body: JSON.stringify({ nickname }) }),
+  likePost: (targetType: PostType, targetId: number, liked: boolean) =>
+    api.post<LikeResult>('/api/likes/toggle', { targetType, targetId, liked }),
 
   getDraft: (draftType: string, draftKey: string) =>
     api.get<Draft | null>('/api/drafts', { draftType, draftKey }),

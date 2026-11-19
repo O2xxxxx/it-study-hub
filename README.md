@@ -15,6 +15,7 @@
 | 积分中心 | 余额、积分流水、已兑换资源，全部以服务端结果为准 |
 | 全站搜索 | Ctrl/⌘ + K 唤起，文章/问题/资源统一检索，类型与版块筛选、键盘导航 |
 | 收藏与回看 | 文章、问题、资源可收藏，个人中心分类查看，跨刷新保留 |
+| 用户主页与社交 | 公开主页、文章与问答分页、粉丝与关注、编辑昵称、文章和问答点赞 |
 | 写作台 | 实时预览、代码高亮、草稿按账号与编辑对象隔离自动保存，发布后清理 |
 
 ## 二、环境依赖
@@ -38,7 +39,7 @@
 bash db/reset-db.sh
 ```
 
-脚本依次执行 `db/schema.sql`、`db/seed.sql`、`db/seed-content.sql`、`db/seed-qa.sql`，并打印各表行数。演示账号密码见第六节。
+脚本依次加载建表、种子数据和社交迁移，并打印各表行数。演示账号密码见第六节。现有数据库升级时，暂停应用写入，选择 itstudy 库后执行 `db/migrations/20261119_profile_social.sql`。迁移可重复执行。
 
 ### 3. 启动后端
 
@@ -59,22 +60,22 @@ Vite 已配置代理：`/api` 与 `/files` 转发到 `http://localhost:8080`，�
 ## 四、测试
 
 ```bash
-# 1) 后端测试（10 个测试类 / 28 项用例，使用 itstudy_test 库）
-bash scripts/refresh-test-db.sh          # 把种子数据同步到测试库（可重复）
+# 1) 后端测试（使用 itstudy_test 库）
+bash scripts/refresh-test-db.sh          # 从仓库种子重建测试库
 bash scripts/mvn.sh -f backend/pom.xml test
 
 # 2) 前端类型检查 + 生产构建
 cd frontend && npx tsc --noEmit && npx vite build
 
-# 3) 接口级验收（37 项断言，需后端已启动）
+# 3) 接口级验收（需后端已启动）
 bash scripts/acceptance.sh http://localhost:8080
 
-# 4) 浏览器端到端（31 项断言，真实 Chrome 无头驱动）
+# 4) 浏览器端到端（真实 Chrome 无头驱动）
 cd frontend && node scripts/e2e-ui.mjs
 ```
 
-接口验收覆盖：游客拦截、注册 0 分、积分不足、发文 +5、编辑不加分、答题 +3、同题重复回答 409、兑换扣分、重复兑换/重复下载不扣分、未兑换下载 403、并发兑换只扣一次、搜索、草稿、收藏、采纳权限。
-浏览器端到端覆盖完整演示剧本（含 Ctrl+K 键盘搜索、草稿刷新恢复、移动端兑换下载），截图脚本为 `scripts/shoot.mjs`。
+接口验收覆盖：游客拦截、注册 0 分、积分不足、发文 +5、编辑不加分、答题 +3、同题重复回答 409、兑换扣分、重复兑换/重复下载不扣分、未兑换下载 403、并发兑换只扣一次、搜索、草稿、收藏、采纳权限，并验证公开主页、关注权限、点赞幂等和积分流水链接。
+浏览器端到端覆盖完整演示剧本（含 Ctrl+K 键盘搜索、草稿刷新恢复、移动端兑换下载、关注与点赞刷新恢复、点赞回滚），截图脚本为 `scripts/shoot.mjs`。
 
 ## 五、配置项
 
@@ -98,6 +99,15 @@ cd frontend && node scripts/e2e-ui.mjs
 
 - `docs/api-contract.md` —— 接口与数据约定
 - `docs/course-design.md` —— 组织结构图、功能模块图、表结构与 ER 图、截图与关键代码
-- `docs/screenshots/` —— 16 张真实运行截图（桌面/移动、亮色/暗色、兑换弹层与积分不足）
+- `docs/screenshots/` —— 20 张运行截图（桌面／移动、亮色／暗色、积分兑换、用户主页与点赞）
 - `scripts/shoot.mjs` —— 无头 Chrome + CDP 截图脚本（登录、切主题、真实鼠标键盘、局部裁剪）
 - `frontend/scripts/e2e-ui.mjs` —— Playwright 浏览器端到端脚本
+## 八、隔离验证与截图
+
+在其他本机端口验证时，初始化和测试脚本读取 DB_PORT，后端读取 SPRING_DATASOURCE_URL 与 SERVER_PORT。给 Vite 设置 ITSTUDY_API_ORIGIN，给浏览器脚本设置 ITSTUDY_WEB_ORIGIN，并将该前端来源填入后端的 APP_CORS_ALLOWED_ORIGINS。MAVEN_REPO_LOCAL 可指向可写的独立 Maven 缓存。测试库名称沿用 itstudy_test。
+
+从仓库根目录运行以下命令，可以补拍社交模块和新版首页。
+
+```bash
+node scripts/shoot.mjs scripts/shoot-plan-final.json 01-home-desktop 02-sections-desktop 17-profile-own 18-profile-follow 19-profile-mobile 20-article-liked
+```

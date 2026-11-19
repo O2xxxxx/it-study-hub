@@ -35,6 +35,7 @@ export interface SectionBrief {
 
 export interface AuthorBrief {
   id: number
+  username?: string
   nickname: string
   avatarHue: number
 }
@@ -47,7 +48,7 @@ export interface Page<T> {
   totalPages: number
 }
 
-export interface ArticleCard {
+export interface ArticleCard extends LikeStateFields {
   id: number
   title: string
   summary: string
@@ -55,6 +56,7 @@ export interface ArticleCard {
   sectionCode: string
   sectionName: string
   authorId: number
+  authorUsername?: string
   authorName: string
   authorAvatarHue: number
   rewardGranted: boolean
@@ -63,7 +65,7 @@ export interface ArticleCard {
   favorite: boolean
 }
 
-export interface ArticleDetail {
+export interface ArticleDetail extends LikeStateFields {
   id: number
   title: string
   summary: string
@@ -79,13 +81,14 @@ export interface ArticleDetail {
   canEdit: boolean
 }
 
-export interface QuestionCard {
+export interface QuestionCard extends LikeStateFields {
   id: number
   title: string
   sectionId: number
   sectionCode: string
   sectionName: string
   authorId: number
+  authorUsername?: string
   authorName: string
   authorAvatarHue: number
   answerCount: number
@@ -105,7 +108,7 @@ export interface Answer {
   isMine: boolean
 }
 
-export interface QuestionDetail {
+export interface QuestionDetail extends LikeStateFields {
   id: number
   title: string
   contentMd: string
@@ -147,6 +150,7 @@ export interface PointLog {
   reasonDesc: string
   refType: string
   refId: number
+  targetPath?: string
   createdAt: string
 }
 
@@ -218,4 +222,35 @@ export interface ExchangeResult {
   balance: number
   exchangeId?: number
   alreadyOwned?: boolean
+}
+
+export type PostType = 'article' | 'question'
+
+export interface LikeStateFields {
+  likeCount: number
+  likedByMe: boolean
+}
+
+export interface LikeResult {
+  liked: boolean
+  count: number
+}
+
+export interface UserProfile extends User {
+  articleCount: number
+  answerCount: number
+  followerCount: number
+  followingCount: number
+  followedByMe: boolean
+  isSelf: boolean
+}
+
+export type UserBrief =
+  | { id: number; deleted: true; nickname: string }
+  | { id: number; deleted: false; nickname: string; username: string; avatarHue: number }
+
+export interface FollowResult {
+  following: boolean
+  followerCount: number
+  followingCount: number
 }

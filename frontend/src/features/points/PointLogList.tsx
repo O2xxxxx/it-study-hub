@@ -5,19 +5,8 @@ import { cn, formatDateTime } from '@/lib/utils'
 import { reasonLabel } from '@/features/common/sectionTheme'
 import { EmptyState } from '@/components/ui/empty-state'
 
-const REF_ROUTES: Record<string, (id: string) => string> = {
-  ARTICLE: (id) => '/articles/' + id,
-  QUESTION: (id) => '/qa/' + id,
-  RESOURCE: (id) => '/resources/' + id,
-}
-
 export function refLink(log: PointLog): string | null {
-  if (!log.refId) return null
-  if (log.refType && REF_ROUTES[log.refType]) return REF_ROUTES[log.refType](String(log.refId))
-  if (log.reasonType === 'ARTICLE_REWARD') return '/articles/' + log.refId
-  if (log.reasonType === 'ANSWER_REWARD') return '/qa/' + log.refId
-  if (log.reasonType === 'RESOURCE_EXCHANGE') return '/resources/' + log.refId
-  return null
+  return log.targetPath ?? null
 }
 
 export function PointLogList({ logs, className }: { logs: PointLog[]; className?: string }) {

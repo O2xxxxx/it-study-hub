@@ -13,6 +13,7 @@ import com.itstudy.entity.Article;
 import com.itstudy.entity.Favorite;
 import com.itstudy.entity.Section;
 import com.itstudy.mapper.AppUserMapper;
+import com.itstudy.mapper.PostLikeMapper;
 import com.itstudy.mapper.ArticleMapper;
 import com.itstudy.mapper.FavoriteMapper;
 import com.itstudy.mapper.PointLogMapper;
@@ -38,6 +39,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleMapper articleMapper;
     private final SectionMapper sectionMapper;
     private final AppUserMapper appUserMapper;
+    private final PostLikeMapper postLikeMapper;
     private final PointLogMapper pointLogMapper;
     private final FavoriteMapper favoriteMapper;
     private final MarkdownRenderer markdownRenderer;
@@ -46,6 +48,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleServiceImpl(ArticleMapper articleMapper,
                               SectionMapper sectionMapper,
                               AppUserMapper appUserMapper,
+                              PostLikeMapper postLikeMapper,
                               PointLogMapper pointLogMapper,
                               FavoriteMapper favoriteMapper,
                               MarkdownRenderer markdownRenderer,
@@ -53,6 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
         this.articleMapper = articleMapper;
         this.sectionMapper = sectionMapper;
         this.appUserMapper = appUserMapper;
+        this.postLikeMapper = postLikeMapper;
         this.pointLogMapper = pointLogMapper;
         this.favoriteMapper = favoriteMapper;
         this.markdownRenderer = markdownRenderer;
@@ -104,10 +108,13 @@ public class ArticleServiceImpl implements ArticleService {
         AppUser authorEntity = article.getAuthorId() == null ? null : appUserMapper.selectById(article.getAuthorId());
         if (authorEntity != null) {
             author.setId(authorEntity.getId());
+            author.setUsername(authorEntity.getUsername());
             author.setNickname(authorEntity.getNickname());
             author.setAvatarHue(authorEntity.getAvatarHue());
         }
         detail.setAuthor(author);
+        detail.setLikeCount(article.getLikeCount() == null ? 0 : article.getLikeCount());
+        detail.setLikedByMe(userId != null && postLikeMapper.existsLike(userId, "article", id));
 
         detail.setFavorite(isFavorited(userId, id));
         detail.setCanEdit(userId != null && userId.equals(article.getAuthorId()));
@@ -172,7 +179,9 @@ public class ArticleServiceImpl implements ArticleService {
         if (userId == null || !userId.equals(article.getAuthorId())) {
             throw BizException.forbidden("只能删除自己的文章");
         }
-        articleMapper.deleteById(id);
+        if (articleMapper.deleteById(id) == 1) {
+            postLikeMapper.deleteForPost("article", id);
+        }
     }
 
     private boolean isFavorited(Long userId, Long articleId) {

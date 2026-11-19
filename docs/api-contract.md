@@ -118,7 +118,7 @@
 }
 ```
 
-reasonType 取值：ARTICLE_REWARD / ANSWER_REWARD / RESOURCE_EXCHANGE。
+reasonType 取值：ARTICLE_PUBLISH / ANSWER_REWARD / RESOURCE_EXCHANGE。流水存在有效业务对象时另返回 targetPath。扣分流水的 refId 可以是兑换记录 ID，页面直接采用 targetPath 跳转至实际资源。
 
 ## 7. 全站搜索
 
@@ -161,3 +161,23 @@ draftKey 规则：新建用 `new`，编辑用实体 id 字符串。draftType ∈
 - 所有写接口在 Controller 层校验会话；Service 层再校验归属（作者/提问者），两道防线。
 - 积分余额一律从数据库读回，前端不使用本地推算值。
 - 时间统一格式 `yyyy-MM-dd HH:mm:ss`，时区 Asia/Shanghai。
+
+## 11. 用户主页、点赞和关注
+
+主页查询公开，沿用 page 和 size 分页参数。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | /api/users/{username} | { id, username, nickname, avatarHue, points, createdAt, articleCount, answerCount, followerCount, followingCount, followedByMe, isSelf } |
+| GET | /api/users/{username}/articles | Page<ArticleCard> |
+| GET | /api/users/{username}/questions | Page<QuestionCard> |
+| GET | /api/users/{username}/followers | Page<UserBrief>，注销账号以 { id, nickname, deleted: true } 保留 |
+| GET | /api/users/{username}/following | Page<UserBrief>，存续账号还含 username、avatarHue、deleted=false |
+| POST | /api/users/{username}/follow | 登录，设置关注。返回 { following, followerCount, followingCount }，两个数量属于主页用户 |
+| POST | /api/users/{username}/unfollow | 登录，取消关注。返回结构同上 |
+| PATCH | /api/users/me | 登录，修改本人昵称。body { nickname }，返回 User |
+| POST | /api/likes/toggle | 登录，body { targetType, targetId, liked? }，返回 { liked, count } |
+
+目标类型为 article 或 question，目标不存在返回 404。传入 liked=true/false 设置目标状态，可安全重试。省略 liked 时执行一次切换。关注和取消关注均可安全重试。关注自己返回 400 VALIDATION_ERROR，未登录写入返回 401。
+
+文章和问题的卡片及详情新增 likeCount、likedByMe，游客的 likedByMe 为 false。卡片新增 authorUsername，详情的 author 新增 username。点赞与关注均不改变积分。

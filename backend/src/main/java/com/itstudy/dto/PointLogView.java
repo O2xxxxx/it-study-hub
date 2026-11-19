@@ -13,5 +13,6 @@ public class PointLogView {
     private String reasonDesc;
     private String refType;
     private Long refId;
+    private String targetPath;
     private LocalDateTime createdAt;
 }

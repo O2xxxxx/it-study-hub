@@ -1,10 +1,13 @@
 import * as React from 'react'
 import * as TabsPrimitive from '@radix-ui/react-tabs'
-import { motion } from 'motion/react'
+import { LayoutGroup, motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 import { spring } from '@/lib/motion'
 
-const Tabs = TabsPrimitive.Root
+function Tabs(props: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  const id = React.useId()
+  return <LayoutGroup id={id}><TabsPrimitive.Root {...props} /></LayoutGroup>
+}
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -13,7 +16,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'relative inline-flex h-10 items-center gap-1 rounded-xl border border-border/70 bg-muted/60 p-1 text-muted-foreground',
+      'control-rail relative inline-flex items-center gap-1 text-muted-foreground',
       className,
     )}
     {...props}
@@ -44,7 +47,7 @@ const TabsTrigger = React.forwardRef<
         else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = node
       }}
       className={cn(
-        'relative z-[1] inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+        'relative z-[1] control-segment inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3 text-sm font-medium transition-colors',
         'hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         'data-[state=active]:text-foreground',
         className,
@@ -54,8 +57,9 @@ const TabsTrigger = React.forwardRef<
       {active ? (
         <motion.span
           layoutId={indicatorId}
-          className="absolute inset-0 -z-[1] rounded-lg bg-card shadow-sm ring-1 ring-border/70"
-          transition={spring.snappy}
+          data-indicator=""
+          className="absolute inset-0 -z-[1] bg-card shadow-sm ring-1 ring-border/70"
+          transition={spring.gentle}
         />
       ) : null}
       {children}

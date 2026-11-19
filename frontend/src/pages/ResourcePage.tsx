@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowLeft, CheckCircle2, Coins, Download, FileText, Lock, Sparkles } from 'lucide-react'
@@ -16,7 +16,7 @@ import { ErrorBlock, LoginPrompt, PageShell, ScrollLink } from '@/features/commo
 import { paletteFor } from '@/features/common/sectionTheme'
 import { AnimatedNumber } from '@/features/common/AnimatedNumber'
 import { FavoriteButton } from '@/features/favorites/FavoriteButton'
-import { spring } from '@/lib/motion'
+import { panelVariants } from '@/lib/motion'
 
 export default function ResourcePage() {
   const { id } = useParams()
@@ -32,6 +32,13 @@ export default function ResourcePage() {
   const [exchangeOpen, setExchangeOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const [dialogError, setDialogError] = useState('')
+  const focusDownload = useRef(false)
+  const downloadRef = useCallback((node: HTMLAnchorElement | null) => {
+    if (node && focusDownload.current) {
+      focusDownload.current = false
+      node.focus({ preventScroll: true })
+    }
+  }, [])
 
   useEffect(() => {
     if (resource) setOwned(resource.owned)
@@ -65,6 +72,7 @@ export default function ResourcePage() {
     setDialogError('')
     try {
       const result = await api.exchange(resourceId)
+      focusDownload.current = true
       setOwned(true)
       setBalance(result.balance)
       setExchangeOpen(false)
@@ -123,7 +131,7 @@ export default function ResourcePage() {
             </span>
           </div>
 
-          <h1 className="mt-3 text-balance text-2xl font-semibold leading-tight tracking-tight md:text-3xl">{resource.title}</h1>
+          <h1 className="page-title mt-3 text-balance">{resource.title}</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{resource.description}</p>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-card/70 p-4 backdrop-blur-md">
@@ -152,10 +160,7 @@ export default function ResourcePage() {
                 {owned ? (
                   <motion.div
                     key="owned"
-                    initial={{ opacity: 0, scale: 0.94 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.94 }}
-                    transition={spring.snappy}
+                    initial="closed" animate="open" exit="closed" variants={panelVariants}
                     className="flex items-center gap-2"
                   >
                     <Badge variant="success" className="gap-1 text-[11px]">
@@ -163,7 +168,7 @@ export default function ResourcePage() {
                       已兑换
                     </Badge>
                     <Button asChild>
-                      <a href={api.downloadUrl(resource.id)}>
+                      <a ref={downloadRef} href={api.downloadUrl(resource.id)}>
                         <Download className="size-4" aria-hidden />
                         下载文件
                       </a>
@@ -172,10 +177,7 @@ export default function ResourcePage() {
                 ) : (
                   <motion.div
                     key="exchange"
-                    initial={{ opacity: 0, scale: 0.94 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.94 }}
-                    transition={spring.snappy}
+                    initial="closed" animate="open" exit="closed" variants={panelVariants}
                   >
                     <Popover open={exchangeOpen} onOpenChange={handleExchangeOpenChange}>
                       <PopoverTrigger asChild>
