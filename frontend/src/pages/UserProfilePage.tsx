@@ -15,7 +15,7 @@ import { ArticleCardItem } from '@/features/articles/ArticleCard'
 import { QuestionCardItem } from '@/features/questions/QuestionCard'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { AnimatedNumber } from '@/features/common/AnimatedNumber'
-import { errorMessage, useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
+import { errorMessage, useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, LoadingRows, PageShell, Pager } from '@/features/common/ui'
 import { ProfileLibrary } from '@/features/profile/ProfileLibrary'
 import { api } from '@/lib/api'
@@ -46,7 +46,6 @@ export function UserProfile({ username, ownRoute = false }: { username: string; 
     [username, page, tab, user?.id])
   const data = profile.data
   useDocumentTitle(data?.nickname ?? '用户主页')
-  useRestoreScroll(location.pathname, !profile.loading && !articles.loading && !questions.loading)
 
   async function toggleFollow() {
     if (!user) {
@@ -90,7 +89,7 @@ export function UserProfile({ username, ownRoute = false }: { username: string; 
     }
   }
 
-  if (profile.loading) return <PageShell><LoadingRows rows={3} /></PageShell>
+  if (profile.loading) return <PageShell loading><LoadingRows rows={3} /></PageShell>
   if (!data) return <PageShell><ErrorBlock message={profile.error ?? '用户不存在'} onRetry={profile.reload} /></PageShell>
   const own = data.isSelf
   const library = ownRoute && own

@@ -227,7 +227,6 @@ export function SectionSelect({
   )
 }
 
-/** 列表跳详情前写入滚动记忆，返回时由页面 useRestoreScroll 还原。 */
 export function ScrollLink({
   to,
   className,
@@ -292,8 +291,19 @@ export function LoginPrompt({
   )
 }
 
-export function PageShell({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('container py-8 md:py-16', className)}>{children}</div>
+export function PageShell({ children, className, loading }: {
+  children: ReactNode
+  className?: string
+  loading?: boolean
+}) {
+  return (
+    <div
+      aria-busy={loading || undefined}
+      className={cn('container py-8 md:py-16', loading && 'min-h-[calc(100svh-4rem)]', className)}
+    >
+      {children}
+    </div>
+  )
 }
 
 export function PageHeading({

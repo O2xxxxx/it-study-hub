@@ -95,7 +95,8 @@ export function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-48" onCloseAutoFocus={event => {
-              if (settings) event.preventDefault()
+              event.preventDefault()
+              if (!settings) accountTrigger.current?.focus({ preventScroll: true })
             }}>
               {user ? <>
                 <DropdownMenuItem asChild><Link to="/me"><CircleUserRound className="mr-2 size-4" />我的主页</Link></DropdownMenuItem>

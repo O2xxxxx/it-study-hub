@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { Search } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthProvider'
-import { useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
+import { useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, LoadingRows, PageShell } from '@/features/common/ui'
 import { sectionIcon } from '@/features/common/sectionTheme'
 import { useSearchController } from '@/features/search/SearchProvider'
@@ -14,13 +14,11 @@ import { api } from '@/lib/api'
 export default function HomePage() {
   const { open } = useSearchController()
   const { user } = useAuth()
-  const location = useLocation()
   const sections = useAsync(() => api.sections(), [])
   const articles = useAsync(() => api.articles({ page: 1, size: 3, sort: 'latest' }), [user?.id])
   const questions = useAsync(() => api.questions({ page: 1, size: 3, filter: 'all' }), [user?.id])
   const resources = useAsync(() => api.resources({ page: 1, size: 3 }), [user?.id])
   useDocumentTitle('首页')
-  useRestoreScroll(location.pathname, !sections.loading && !articles.loading && !questions.loading && !resources.loading)
 
   return (
     <PageShell className="!py-0">

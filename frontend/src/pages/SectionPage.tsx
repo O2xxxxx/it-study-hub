@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, FileText, HelpCircle, Package } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { spring } from '@/lib/motion'
@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { api } from '@/lib/api'
 import type { ArticleCard, Page, QuestionCard, ResourceCard } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
+import { useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, PageShell, Pager, Segmented } from '@/features/common/ui'
 import { ArticleCardItem } from '@/features/articles/ArticleCard'
 import { QuestionCardItem } from '@/features/questions/QuestionCard'
@@ -23,7 +23,6 @@ const PAGE_SIZE = 8
 
 export default function SectionPage() {
   const { code = '' } = useParams()
-  const location = useLocation()
   const reduced = useReducedMotion()
   const [tab, setTab] = useState<TabKey>('article')
   const [sort, setSort] = useState<'latest' | 'hot'>('latest')
@@ -51,7 +50,6 @@ export default function SectionPage() {
   }, [code, tab, pageNo, sort, filter, retryKey])
 
   useDocumentTitle(section.data?.name ?? '版块详情')
-  useRestoreScroll(location.pathname, !list.loading)
 
   const total = list.data?.total ?? 0
   const counts = {

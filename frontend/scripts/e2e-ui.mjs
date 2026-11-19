@@ -12,7 +12,12 @@ function check(name, pass, detail) {
   console.log((pass ? 'PASS ' : 'FAIL ') + name + (detail ? ' :: ' + detail : ''))
 }
 
-const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
+const browser = await chromium.launch({
+  executablePath: CHROME,
+  headless: true,
+  ignoreDefaultArgs: ['--hide-scrollbars'],
+  args: ['--no-sandbox', '--disable-dev-shm-usage'],
+})
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 }, locale: 'zh-CN', acceptDownloads: true })
 const page = await ctx.newPage()
 const errors = []
@@ -151,6 +156,13 @@ try {
     return Math.abs(nav.left + nav.width / 2 - innerWidth / 2) < 1 && Math.abs(group.left - footer.left) < 1
   })
   check('桌面导航居中且页脚与卡片共用左边线', alignment)
+  const primaryNav = page.getByRole('navigation', { name: '主导航', exact: true })
+  const navLeft = () => primaryNav.evaluate(nav => nav.getBoundingClientRect().left)
+  const homeNavLeft = await navLeft()
+  await primaryNav.getByRole('link', { name: '版块', exact: true }).click()
+  await page.getByRole('heading', { name: '技术版块', level: 1, exact: true }).waitFor()
+  check('长短页面切换时桌面导航位置一致', Math.abs(await navLeft() - homeNavLeft) < 1)
+  await primaryNav.getByRole('link', { name: '首页', exact: true }).click()
   const searchTrigger = page.locator('#home-search')
   await searchTrigger.click()
   const searchPanel = page.getByRole('dialog', { name: '全站搜索' })
@@ -256,7 +268,8 @@ try {
   await page.getByRole('heading', { name: 'E2E 资料已更新' }).waitFor()
   check('本人主页编辑资料', (await me()).nickname === 'E2E 资料已更新')
 
-  const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, acceptDownloads: true, locale: 'zh-CN' })
+  const mobileViewport = { width: 390, height: 844 }
+  const mctx = await browser.newContext({ viewport: mobileViewport, isMobile: true, hasTouch: true, acceptDownloads: true, locale: 'zh-CN' })
   const mp = await mctx.newPage()
   await mp.goto(BASE + '/login', { waitUntil: 'networkidle' })
   const mobileUser = user + 'm'
@@ -271,6 +284,19 @@ try {
   await mp.fill('#password', pwd)
   await mp.locator('button[type=submit]').first().click()
   await mp.waitForURL(u => !u.pathname.startsWith('/login'))
+  await mp.goto(BASE + '/', { waitUntil: 'networkidle' })
+  const mobileNav = mp.getByRole('navigation', { name: '移动端主导航' })
+  const navFitsScreen = () => mobileNav.evaluate((nav, viewport) => {
+    const bounds = nav.getBoundingClientRect()
+    return document.documentElement.scrollWidth <= viewport.width
+      && Math.abs(bounds.width - viewport.width) < 1
+      && Math.abs(bounds.bottom - viewport.height) < 1
+  }, mobileViewport)
+  const homeNavFits = await navFitsScreen()
+  await mobileNav.getByRole('link', { name: '资源', exact: true }).tap()
+  await mp.getByRole('heading', { name: '技术资料区', exact: true }).waitFor()
+  await mp.locator('main a[href^="/resources/"]').first().waitFor()
+  check('切换首页和资源区时底栏贴合手机视口', homeNavFits && await navFitsScreen())
   await mp.goto(BASE + '/u/bob', { waitUntil: 'networkidle' })
   const mobileProfile = mp.getByRole('region', { name: '用户资料' })
   await mobileProfile.getByRole('button', { name: '关注', exact: true }).click()

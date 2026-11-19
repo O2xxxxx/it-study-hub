@@ -32,8 +32,8 @@ export const listItemVariants: Variants = {
 }
 
 export const pageVariants: Variants = {
-  closed: { opacity: 0, y: 8, transition: { duration: duration.page, ease } },
-  open: { opacity: 1, y: 0, transition: { duration: duration.page, ease } },
+  closed: { opacity: 0, transition: { duration: duration.close, ease: 'easeIn' } },
+  open: { opacity: 1, transition: { duration: duration.page, ease } },
 }
 
 export const fade = { initial: 'closed', animate: 'open', exit: 'closed', variants: listItemVariants }

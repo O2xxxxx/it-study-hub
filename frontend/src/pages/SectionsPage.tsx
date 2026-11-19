@@ -1,16 +1,14 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import { api } from '@/lib/api'
-import { useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
+import { useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, PageHeading, PageShell, ScrollLink } from '@/features/common/ui'
 import { sectionIcon } from '@/features/common/sectionTheme'
 
 export default function SectionsPage() {
   useDocumentTitle('版块')
-  const location = useLocation()
   const sections = useAsync(() => api.sections(), [])
-  useRestoreScroll(location.pathname, !sections.loading)
 
   return (
     <PageShell>

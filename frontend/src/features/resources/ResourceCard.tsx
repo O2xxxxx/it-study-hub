@@ -24,7 +24,7 @@ export function ResourceCardItem({ resource, className }: ResourceCardItemProps)
     <ScrollLink
       to={'/resources/' + resource.id}
       className={cn(
-        'content-card group flex flex-col gap-3 rounded-2xl border bg-card p-5',
+        'content-card group flex min-w-0 flex-col gap-3 rounded-2xl border bg-card p-5',
         className,
       )}
     >

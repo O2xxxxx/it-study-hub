@@ -94,7 +94,7 @@ export default function ResourcePage() {
   }
 
   return (
-    <PageShell className="max-w-3xl">
+    <PageShell className="max-w-3xl" loading={state.loading && !resource}>
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <ScrollLink to="/resources" className="inline-flex items-center gap-1 transition hover:text-primary">
           <ArrowLeft className="size-3" aria-hidden />

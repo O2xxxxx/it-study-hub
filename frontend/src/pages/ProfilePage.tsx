@@ -5,7 +5,7 @@ import { UserProfile } from './UserProfilePage'
 
 export default function ProfilePage() {
   const { user, loading } = useAuth()
-  if (loading) return <PageShell><LoadingRows rows={3} /></PageShell>
+  if (loading) return <PageShell loading><LoadingRows rows={3} /></PageShell>
   if (!user) return <Navigate to="/login?redirect=%2Fme" replace />
   return <UserProfile key={user.username} username={user.username} ownRoute />
 }

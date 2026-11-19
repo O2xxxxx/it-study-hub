@@ -86,7 +86,7 @@ export default function QuestionPage() {
   }
 
   return (
-    <PageShell className="max-w-4xl">
+    <PageShell className="max-w-4xl" loading={state.loading && !question}>
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <ScrollLink
           to="/qa"

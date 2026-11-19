@@ -1,9 +1,9 @@
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Coins, Download, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { api } from '@/lib/api'
-import { useAsync, useDocumentTitle, useRestoreScroll } from '@/features/common/hooks'
+import { useAsync, useDocumentTitle } from '@/features/common/hooks'
 import { ErrorBlock, LoadingGrid, PageHeading, PageShell, Pager } from '@/features/common/ui'
 import { ResourceCardItem } from '@/features/resources/ResourceCard'
 
@@ -12,7 +12,6 @@ const PAGE_SIZE = 9
 export default function ResourcesPage() {
   useDocumentTitle('技术资源')
   const [params, setParams] = useSearchParams()
-  const location = useLocation()
   const sectionCode = params.get('sectionCode') ?? ''
   const pageNo = Math.max(1, Number(params.get('page') ?? '1') || 1)
 
@@ -21,7 +20,6 @@ export default function ResourcesPage() {
     () => api.resources({ page: pageNo, size: PAGE_SIZE, sectionCode: sectionCode || undefined }),
     [pageNo, sectionCode],
   )
-  useRestoreScroll(location.pathname + location.search, !list.loading)
 
   const setSection = (code: string) => {
     const merged = new URLSearchParams(params)

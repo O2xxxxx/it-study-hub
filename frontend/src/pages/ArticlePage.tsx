@@ -36,7 +36,7 @@ export default function ArticlePage() {
   }
 
   return (
-    <PageShell className="max-w-3xl">
+    <PageShell className="max-w-3xl" loading={state.loading && !article}>
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <Link
           to="/sections"

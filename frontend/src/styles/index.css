@@ -129,9 +129,16 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    scrollbar-gutter: stable both-edges;
     scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
+  }
+
+  @supports (scrollbar-gutter: stable both-edges) {
+    /* The root already reserves the scrollbar space while Radix locks scrolling. */
+    html body[data-scroll-locked] {
+      margin-right: 0 !important;
+    }
   }
 
   body {
@@ -724,7 +731,6 @@
 @keyframes overlay-leave { from { opacity: 1; } to { opacity: 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   .motion-panel, .motion-panel[data-side], .motion-panel[data-motion-edge] {
     --panel-x: 0px;
     --panel-y: 0px;
