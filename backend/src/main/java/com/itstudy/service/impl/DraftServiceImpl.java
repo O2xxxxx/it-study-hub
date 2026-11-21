@@ -1,11 +1,14 @@
 package com.itstudy.service.impl;
 
+import com.itstudy.common.BizException;
 import com.itstudy.dto.DraftForm;
 import com.itstudy.dto.DraftView;
 import com.itstudy.entity.Draft;
 import com.itstudy.mapper.DraftMapper;
 import com.itstudy.service.DraftService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class DraftServiceImpl implements DraftService {
@@ -14,6 +17,15 @@ public class DraftServiceImpl implements DraftService {
 
     public DraftServiceImpl(DraftMapper draftMapper) {
         this.draftMapper = draftMapper;
+    }
+
+    @Override
+    public List<DraftView> list(Long userId, String draftType) {
+        String type = draftType == null || draftType.isBlank() ? null : draftType.trim();
+        if (type != null && !"article".equals(type) && !"question".equals(type)) {
+            throw BizException.validation("draftType 只能是 article 或 question");
+        }
+        return draftMapper.selectByUserAndType(userId, type).stream().map(this::toView).toList();
     }
 
     @Override

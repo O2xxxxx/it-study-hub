@@ -15,6 +15,9 @@ public final class ErrorCodes {
     public static final String ALREADY_ACCEPTED = "ALREADY_ACCEPTED";
     public static final String DUPLICATE_USERNAME = "DUPLICATE_USERNAME";
     public static final String CANNOT_ANSWER_OWN_QUESTION = "CANNOT_ANSWER_OWN_QUESTION";
+    public static final String CONFLICT = "CONFLICT";
+    public static final String METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED";
+    public static final String UNSUPPORTED_MEDIA_TYPE = "UNSUPPORTED_MEDIA_TYPE";
     public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
 
     private ErrorCodes() {

@@ -108,7 +108,7 @@ export default function ArticleEditorPage() {
   useEffect(() => {
     if (!dirty) return
     draft.save(form)
-  }, [form, dirty, draft])
+  }, [form, dirty, draft.save])
 
   const validate = () => {
     const next: FieldErrors = {}

@@ -8,8 +8,21 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface DraftMapper extends BaseMapper<Draft> {
+
+    /** 按账号列出草稿；draftType 为空时返回全部类型。 */
+    @Select("""
+            <script>
+            SELECT * FROM draft
+            WHERE user_id = #{userId}
+            <if test="draftType != null and draftType != ''">AND draft_type = #{draftType}</if>
+            ORDER BY updated_at DESC, id DESC
+            </script>
+            """)
+    List<Draft> selectByUserAndType(@Param("userId") Long userId, @Param("draftType") String draftType);
 
     @Select("""
             SELECT * FROM draft

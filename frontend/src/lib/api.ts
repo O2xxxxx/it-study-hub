@@ -34,8 +34,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(path, {
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
       ...init,
+      headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
     })
   } catch {
     throw new ApiError(0, 'NETWORK_ERROR', '网络连接失败，请检查后端服务是否启动')
@@ -116,6 +116,7 @@ export const api = {
   likePost: (targetType: PostType, targetId: number, liked: boolean) =>
     api.post<LikeResult>('/api/likes/toggle', { targetType, targetId, liked }),
 
+  drafts: (draftType?: string) => api.get<Draft[]>('/api/drafts', { draftType }),
   getDraft: (draftType: string, draftKey: string) =>
     api.get<Draft | null>('/api/drafts', { draftType, draftKey }),
   saveDraft: (body: { draftType: string; draftKey: string; title?: string; sectionId?: number; contentMd: string }) =>

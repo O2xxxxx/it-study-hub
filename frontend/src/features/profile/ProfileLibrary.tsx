@@ -18,32 +18,12 @@ import { FAVORITE_CHANGED_EVENT } from '@/features/favorites/FavoriteButton'
 
 type FavoriteTab = 'article' | 'question' | 'resource'
 
-async function loadDrafts(): Promise<Draft[]> {
-  try {
-    const raw = await api.get<unknown>('/api/drafts', { draftType: 'article' })
-    const list = Array.isArray(raw)
-      ? raw
-      : raw && Array.isArray((raw as { items?: unknown[] }).items)
-        ? ((raw as { items: unknown[] }).items ?? [])
-        : []
-    if (list.length > 0) return list as Draft[]
-  } catch {
-    // 契约里没有草稿列表接口，后端不支持时回退到读取新建草稿
-  }
-  try {
-    const single = await api.getDraft('article', 'new')
-    return single ? [single] : []
-  } catch {
-    return []
-  }
-}
-
 export function ProfileLibrary({ tab }: { tab: string }) {
   const [favoriteTab, setFavoriteTab] = useState<FavoriteTab>('article')
   const [draftsNonce, setDraftsNonce] = useState(0)
   const [deletingDraft, setDeletingDraft] = useState<string | null>(null)
   const favorites = useAsync<FavoriteGroups | null>(() => tab === 'favorites' ? api.favorites() : Promise.resolve(null), [tab])
-  const drafts = useAsync<Draft[]>(() => tab === 'drafts' ? loadDrafts() : Promise.resolve([]), [tab, draftsNonce])
+  const drafts = useAsync<Draft[]>(() => tab === 'drafts' ? api.drafts() : Promise.resolve([]), [tab, draftsNonce])
   const reloadFavorites = favorites.reload
 
   useEffect(() => {

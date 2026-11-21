@@ -181,6 +181,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
         if (articleMapper.deleteById(id) == 1) {
             postLikeMapper.deleteForPost("article", id);
+            favoriteMapper.deleteForTarget("article", id);
         }
     }
 

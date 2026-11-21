@@ -25,6 +25,10 @@ public interface FavoriteMapper extends BaseMapper<Favorite> {
                   @Param("targetType") String targetType,
                   @Param("targetId") Long targetId);
 
+    /** 目标被删除时清理所有用户的收藏，避免收藏表残留幽灵记录。 */
+    @Delete("DELETE FROM favorite WHERE target_type = #{targetType} AND target_id = #{targetId}")
+    int deleteForTarget(@Param("targetType") String targetType, @Param("targetId") Long targetId);
+
     @Select("SELECT COUNT(*) FROM favorite WHERE user_id = #{userId}")
     int countByUser(@Param("userId") Long userId);
 

@@ -68,6 +68,8 @@ public class AuthController {
 
     private void attachSession(HttpServletRequest request, Long userId) {
         HttpSession session = request.getSession(true);
+        // 登录/注册成功后更换会话 id，防止会话固定攻击。
+        request.changeSessionId();
         session.setAttribute(SessionUser.SESSION_KEY, userId);
     }
 }

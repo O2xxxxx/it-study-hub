@@ -9,6 +9,7 @@ import com.itstudy.dto.UserView;
 import com.itstudy.entity.AppUser;
 import com.itstudy.mapper.AppUserMapper;
 import com.itstudy.service.AuthService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,12 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime now = LocalDateTime.now();
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
-        appUserMapper.insert(user);
+        try {
+            appUserMapper.insert(user);
+        } catch (DuplicateKeyException ex) {
+            // 并发注册同名时唯一键兜底，仍按契约返回 409。
+            throw new BizException(ErrorCodes.DUPLICATE_USERNAME, HttpStatus.CONFLICT, "用户名已被占用");
+        }
         return toView(user);
     }
 

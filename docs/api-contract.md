@@ -23,6 +23,10 @@
   | ALREADY_EXCHANGED | 409 | 已兑换（后端返回 200 + owned=true 为主，此码仅并发兜底） |
   | NOT_EXCHANGED | 403 | 未兑换即下载 |
   | ALREADY_ACCEPTED | 409 | 该问题已采纳过回答 |
+  | DUPLICATE_USERNAME | 409 | 用户名已被占用（含并发注册） |
+  | CONFLICT | 409 | 数据约束冲突的通用兜底 |
+  | METHOD_NOT_ALLOWED | 405 | 请求方法不支持 |
+  | UNSUPPORTED_MEDIA_TYPE | 415 | 请求内容类型不支持 |
 - 分页：`?page=1&size=10`（page 从 1 开始）。响应
   ```json
   { "items": [ ... ], "page": 1, "size": 10, "total": 23, "totalPages": 3 }
@@ -149,7 +153,8 @@ snippet 已做 HTML 转义后再插入 mark 标签，前端可直接 dangerously
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| GET | /api/drafts?draftType=article&draftKey=new | 返回草稿或 null（登录后、按 userId 隔离） |
+| GET | /api/drafts?draftType=article&draftKey=new | 返回单条草稿或 null（登录后、按 userId 隔离） |
+| GET | /api/drafts?draftType=article | 列出该类型全部草稿；省略 draftType 返回全部类型，按 updatedAt 倒序 |
 | PUT | /api/drafts | 登录，body { draftType, draftKey, title?, sectionId?, contentMd }，upsert，返回 { updatedAt } |
 | DELETE | /api/drafts?draftType=article&draftKey=12 | 删除（发布成功后调用） |
 

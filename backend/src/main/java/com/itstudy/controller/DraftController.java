@@ -1,6 +1,7 @@
 package com.itstudy.controller;
 
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.itstudy.common.BizException;
 import com.itstudy.common.CurrentUser;
 import com.itstudy.common.RequireLogin;
 import com.itstudy.dto.DraftForm;
@@ -30,10 +31,19 @@ public class DraftController {
         this.draftService = draftService;
     }
 
+    /**
+     * draftKey 有值时返回单条草稿；省略 draftKey 时按 draftType 列出草稿（draftType 也可省略表示全部）。
+     */
     @GetMapping
-    public ResponseEntity<Object> get(@RequestParam String draftType,
-                                      @RequestParam String draftKey,
+    public ResponseEntity<Object> get(@RequestParam(required = false) String draftType,
+                                      @RequestParam(required = false) String draftKey,
                                       @CurrentUser Long userId) {
+        if (draftKey == null || draftKey.isBlank()) {
+            return ResponseEntity.ok(draftService.list(userId, draftType));
+        }
+        if (draftType == null || draftType.isBlank()) {
+            throw BizException.validation("缺少 draftType");
+        }
         DraftView draft = draftService.get(userId, draftType, draftKey);
         return ResponseEntity.ok(draft == null ? NullNode.getInstance() : (Object) draft);
     }

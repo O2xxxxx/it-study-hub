@@ -71,7 +71,11 @@ public interface QuestionMapper extends BaseMapper<Question> {
     @Update("UPDATE question SET answer_count = answer_count + 1, updated_at = NOW() WHERE id = #{id}")
     int incrementAnswerCount(@Param("id") Long id);
 
-    @Update("UPDATE question SET solved = 1, accepted_answer_id = #{answerId}, updated_at = NOW() WHERE id = #{id}")
+    /** 条件更新：只有未采纳的问题才会被标记，并发采纳时最多一条成功。 */
+    @Update("""
+            UPDATE question SET solved = 1, accepted_answer_id = #{answerId}, updated_at = NOW()
+            WHERE id = #{id} AND solved = 0 AND accepted_answer_id IS NULL
+            """)
     int markSolved(@Param("id") Long id, @Param("answerId") Long answerId);
 
     @Update("UPDATE question SET solved = 0, accepted_answer_id = NULL, updated_at = NOW() WHERE id = #{id}")

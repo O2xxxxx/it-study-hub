@@ -241,7 +241,9 @@ public class QuestionServiceImpl implements QuestionService {
         if (!questionId.equals(answer.getQuestionId())) {
             throw BizException.validation("该回答不属于这个问题");
         }
-        questionMapper.markSolved(questionId, answer.getId());
+        if (questionMapper.markSolved(questionId, answer.getId()) == 0) {
+            throw BizException.conflict(ErrorCodes.ALREADY_ACCEPTED, "该问题已经采纳过回答");
+        }
         answerMapper.updateAccepted(answer.getId(), true);
         return AcceptResult.of(questionId, answer.getId());
     }
