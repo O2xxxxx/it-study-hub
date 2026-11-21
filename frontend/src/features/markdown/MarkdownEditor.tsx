@@ -59,7 +59,7 @@ export function MarkdownEditor({
     { key: 'h2', label: '标题', icon: Heading2, run: () => insert('## ', '', '小标题') },
     { key: 'bold', label: '加粗', icon: Bold, run: () => insert('**', '**', '加粗文字') },
     { key: 'italic', label: '斜体', icon: Italic, run: () => insert('_', '_', '斜体文字') },
-    { key: 'code', label: '代码块', icon: Code2, run: () => insert('\n\`\`\`java\n', '\n\`\`\`\n', '// 在这里写代码') },
+    { key: 'code', label: '代码块', icon: Code2, run: () => insert('\n```java\n', '\n```\n', '// 在这里写代码') },
     { key: 'quote', label: '引用', icon: Quote, run: () => insert('> ', '', '引用内容') },
     { key: 'list', label: '列表', icon: List, run: () => insert('- ', '', '列表项') },
   ]

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, FileText, Loader2, Save, Send } from 'lucide-react'
 import { toast } from 'sonner'
@@ -57,6 +57,7 @@ export default function ArticleEditorPage() {
     enabled: dirty && !submitting && Boolean(user),
     loadOnMount: Boolean(user) && validId,
   })
+  const saveDraft = draft.save
 
   useDocumentTitle(isEdit ? '编辑文章' : '写文章')
 
@@ -107,8 +108,8 @@ export default function ArticleEditorPage() {
 
   useEffect(() => {
     if (!dirty) return
-    draft.save(form)
-  }, [form, dirty, draft.save])
+    saveDraft(form)
+  }, [form, dirty, saveDraft])
 
   const validate = () => {
     const next: FieldErrors = {}

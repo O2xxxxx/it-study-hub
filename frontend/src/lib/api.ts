@@ -1,5 +1,5 @@
 import type {
-  ArticleCard, ArticleDetail, AuthState, Draft, ExchangeRecord, ExchangeResult, FavoriteGroups,
+  ArticleCard, ArticleDetail, AuthState, Draft, ExchangeResult, FavoriteGroups,
   MutationResult, Page, PointsOverview, PointLog, QuestionCard, QuestionDetail, ResourceCard,
   SearchResponse, Section, User, UserProfile, UserBrief, FollowResult, LikeResult, PostType,
 } from './types'
