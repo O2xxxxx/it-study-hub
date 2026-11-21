@@ -2,11 +2,13 @@ package com.itstudy;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +35,20 @@ class PointsFlowIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private long sectionId;
+    private long resourceId;
+
+    /** 从种子数据解析实际主键，避免测试依赖固定自增 id。 */
+    @BeforeEach
+    void resolveSeedIds() {
+        sectionId = jdbcTemplate.queryForObject("SELECT id FROM section ORDER BY id LIMIT 1", Long.class);
+        resourceId = jdbcTemplate.queryForObject(
+                "SELECT id FROM resource WHERE points = 5 ORDER BY id LIMIT 1", Long.class);
+    }
 
     private static String unique(String prefix) {
         return prefix + (System.nanoTime() % 1_000_000_000L);
@@ -66,7 +82,7 @@ class PointsFlowIntegrationTest {
         MvcResult created = mvc.perform(post("/api/articles")
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Spring MVC 请求流程测试\",\"sectionId\":1,\"contentMd\":\"## 正文\\n\\nDispatcherServlet 负责分发。\"}"))
+                        .content("{\"title\":\"Spring MVC 请求流程测试\",\"sectionId\":" + sectionId + ",\"contentMd\":\"## 正文\\n\\nDispatcherServlet 负责分发。\"}"))
                 .andExpect(status().isCreated())
                 .andReturn();
         JsonNode createdBody = body(created);
@@ -77,7 +93,7 @@ class PointsFlowIntegrationTest {
         mvc.perform(put("/api/articles/" + articleId)
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"Spring MVC 请求流程测试（修订）\",\"sectionId\":1,\"contentMd\":\"改过的正文\"}"))
+                        .content("{\"title\":\"Spring MVC 请求流程测试（修订）\",\"sectionId\":" + sectionId + ",\"contentMd\":\"改过的正文\"}"))
                 .andExpect(status().isOk());
         assertThat(balance(session)).isEqualTo(5);
     }
@@ -90,7 +106,7 @@ class PointsFlowIntegrationTest {
         MvcResult asked = mvc.perform(post("/api/questions")
                         .session(asker)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"MyBatis 动态 SQL 为什么没生效\",\"sectionId\":2,\"contentMd\":\"if 判断字段为 null。\"}"))
+                        .content("{\"title\":\"MyBatis 动态 SQL 为什么没生效\",\"sectionId\":" + sectionId + ",\"contentMd\":\"if 判断字段为 null。\"}"))
                 .andExpect(status().isOk())
                 .andReturn();
         long questionId = body(asked).get("id").asLong();
@@ -116,7 +132,7 @@ class PointsFlowIntegrationTest {
     void exchangeDeductsOnceAndGuardsDownload() throws Exception {
         MockHttpSession session = register(unique("ex"));
 
-        MvcResult poor = mvc.perform(post("/api/resources/1/exchange").session(session))
+        MvcResult poor = mvc.perform(post("/api/resources/" + resourceId + "//exchange").session(session))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         assertThat(body(poor).get("code").asText()).isEqualTo("POINTS_NOT_ENOUGH");
@@ -124,21 +140,21 @@ class PointsFlowIntegrationTest {
         mvc.perform(post("/api/articles")
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"兑换测试文章\",\"sectionId\":1,\"contentMd\":\"正文\"}"))
+                        .content("{\"title\":\"兑换测试文章\",\"sectionId\":" + sectionId + ",\"contentMd\":\"正文\"}"))
                 .andExpect(status().isCreated());
         assertThat(balance(session)).isEqualTo(5);
 
-        mvc.perform(post("/api/resources/1/exchange").session(session))
+        mvc.perform(post("/api/resources/" + resourceId + "//exchange").session(session))
                 .andExpect(status().isOk());
         assertThat(balance(session)).isEqualTo(0);
 
-        MvcResult again = mvc.perform(post("/api/resources/1/exchange").session(session))
+        MvcResult again = mvc.perform(post("/api/resources/" + resourceId + "//exchange").session(session))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(body(again).get("alreadyOwned").asBoolean()).isTrue();
         assertThat(balance(session)).isEqualTo(0);
 
-        MvcResult download = mvc.perform(get("/api/resources/1/download").session(session))
+        MvcResult download = mvc.perform(get("/api/resources/" + resourceId + "//download").session(session))
                 .andExpect(status().isOk())
                 .andReturn();
         assertThat(download.getResponse().getContentAsByteArray().length).isGreaterThan(500);
@@ -148,10 +164,10 @@ class PointsFlowIntegrationTest {
     void guestWriteOperationsAreRejected() throws Exception {
         mvc.perform(post("/api/articles")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"游客文章\",\"sectionId\":1,\"contentMd\":\"x\"}"))
+                        .content("{\"title\":\"游客文章\",\"sectionId\":" + sectionId + ",\"contentMd\":\"x\"}"))
                 .andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/resources/1/exchange")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/resources/1/download")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/resources/" + resourceId + "//exchange")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/resources/" + resourceId + "//download")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/articles")).andExpect(status().isOk());
     }
 }

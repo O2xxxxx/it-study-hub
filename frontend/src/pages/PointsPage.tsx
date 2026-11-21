@@ -13,7 +13,7 @@ import { AnimatedNumber } from '@/features/common/AnimatedNumber'
 import { fade } from '@/lib/motion'
 
 const REASON_LABEL: Record<string, string> = {
-  ARTICLE_REWARD: '发布文章奖励',
+  ARTICLE_PUBLISH: '发布文章奖励',
   ANSWER_REWARD: '回答问题奖励',
   RESOURCE_EXCHANGE: '兑换技术资料',
 }

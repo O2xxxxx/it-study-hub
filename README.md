@@ -55,7 +55,7 @@ bash scripts/start-backend.sh          # http://localhost:8080
 bash scripts/start-frontend.sh         # http://localhost:5173
 ```
 
-Vite 已配置代理：`/api` 与 `/files` 转发到 `http://localhost:8080`，开发时同源无跨域问题。
+Vite 已配置代理：`/api` 转发到 `http://localhost:8080`，开发时同源无跨域问题。
 
 ## 四、测试
 

@@ -146,7 +146,7 @@ export interface PointLog {
   id: number
   changeAmount: number
   balanceAfter: number
-  reasonType: 'ARTICLE_REWARD' | 'ANSWER_REWARD' | 'RESOURCE_EXCHANGE' | string
+  reasonType: 'ARTICLE_PUBLISH' | 'ANSWER_REWARD' | 'RESOURCE_EXCHANGE' | string
   reasonDesc: string
   refType: string
   refId: number

@@ -146,7 +146,7 @@ export default function ArticleEditorPage() {
         sectionId: form.sectionId as number,
         contentMd: form.contentMd,
       })
-      const delta = typeof result?.pointsDelta === 'number' ? result.pointsDelta : 5
+      const delta = typeof result?.pointsDelta === 'number' ? result.pointsDelta : 0
       await draft.clear()
       if (delta > 0) {
         toast.success('发布成功，+' + delta + ' 积分')

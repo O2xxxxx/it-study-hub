@@ -93,7 +93,7 @@ export function sectionIcon(name?: string): LucideIcon {
 }
 
 export const REASON_LABELS: Record<string, string> = {
-  ARTICLE_REWARD: '文章奖励',
+  ARTICLE_PUBLISH: '文章奖励',
   ANSWER_REWARD: '回答奖励',
   RESOURCE_EXCHANGE: '资源兑换',
 }

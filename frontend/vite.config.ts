@@ -14,7 +14,6 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/api': { target: apiTarget, changeOrigin: true },
-      '/files': { target: apiTarget, changeOrigin: true },
     },
   },
   build: {

@@ -3,11 +3,13 @@ package com.itstudy;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itstudy.mapper.FavoriteMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,8 +38,17 @@ class DraftApiTest {
     private ObjectMapper objectMapper;
     @Autowired
     private FavoriteMapper favoriteMapper;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private long sectionId;
 
     private record Account(MockHttpSession session, long userId) {
+    }
+
+    @BeforeEach
+    void resolveSection() {
+        sectionId = jdbcTemplate.queryForObject("SELECT id FROM section ORDER BY id LIMIT 1", Long.class);
     }
 
     private String unique(String prefix) {
@@ -93,7 +104,7 @@ class DraftApiTest {
         Account account = register(unique("del"));
         MvcResult created = mvc.perform(post("/api/articles").session(account.session())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"title\":\"待删除文章\",\"sectionId\":1,\"contentMd\":\"正文内容\"}"))
+                        .content("{\"title\":\"待删除文章\",\"sectionId\":" + sectionId + ",\"contentMd\":\"正文内容\"}"))
                 .andExpect(status().isCreated())
                 .andReturn();
         long articleId = body(created).get("id").asLong();
